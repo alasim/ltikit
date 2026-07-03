@@ -1,0 +1,29 @@
+{
+  "name": "@ltikit/adapter-memory",
+  "version": "0.0.0",
+  "description": "In-memory NonceStore/PlatformStore adapters for ltikit — dev + testing.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ltikit/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
