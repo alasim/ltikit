@@ -69,6 +69,6 @@ export function signJwt(payload: JWTPayload, opts: SignOptions): Promise<string>
     .setExpirationTime(opts.expiresIn ?? '1m')
     .setIssuer(opts.issuer)
     .setAudience(opts.audience)
-    .setJti(crypto.randomUUID())
+    .setJti(globalThis.crypto.randomUUID())
     .sign(opts.privateKey)
 }
