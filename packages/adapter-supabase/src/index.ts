@@ -51,6 +51,13 @@ interface PlatformRow {
   deployment_id: string | null
 }
 
+function errorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: unknown }).message)
+  }
+  return String(error)
+}
+
 function mapPlatform(row: PlatformRow): Platform {
   return {
     id: row.id,
@@ -74,7 +81,12 @@ export function supabasePlatformStore(
       let query = client.from(table).select('*').eq('issuer', iss)
       if (clientId != null) query = query.eq('client_id', clientId)
       const { data, error } = await query.limit(1).maybeSingle()
-      if (error || !data) return null
+      // Surface real failures (missing table, connection, RLS misconfig) instead
+      // of masking them as "platform not found". A genuine no-match is data=null.
+      if (error) {
+        throw new Error(`ltikit: ${table} lookup failed for iss=${iss}: ${errorMessage(error)}`)
+      }
+      if (!data) return null
       return mapPlatform(data as PlatformRow)
     },
   }
@@ -108,7 +120,7 @@ export function supabaseNonceStore(
         data: rec.data ?? null,
         expires_at: expiresAt,
       })
-      if (error) throw new Error(`ltikit: failed to store nonce: ${String(error)}`)
+      if (error) throw new Error(`ltikit: failed to store nonce: ${errorMessage(error)}`)
     },
 
     async consume(state: string): Promise<ConsumedNonce | null> {

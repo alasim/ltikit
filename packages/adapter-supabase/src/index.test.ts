@@ -123,6 +123,40 @@ describe('@ltikit/adapter-supabase mapping', () => {
     expect(await store.find(p.issuer, 'client-1')).toEqual(p)
   })
 
+  it('surfaces a query error instead of masking it as "not found"', async () => {
+    const erroringClient = {
+      from: () => ({
+        select() {
+          return this
+        },
+        insert() {
+          return this
+        },
+        delete() {
+          return this
+        },
+        eq() {
+          return this
+        },
+        limit() {
+          return this
+        },
+        maybeSingle() {
+          return Promise.resolve({
+            data: null,
+            error: { message: 'relation "lti_platforms" does not exist' },
+          })
+        },
+        then(f: (v: SupabaseResult) => unknown) {
+          return Promise.resolve({ data: null, error: null }).then(f)
+        },
+      }),
+    } as unknown as SupabaseLike
+    await expect(supabasePlatformStore(erroringClient).find('https://x')).rejects.toThrow(
+      /does not exist/,
+    )
+  })
+
   it('round-trips the jsonb data payload through create → consume', async () => {
     const store = supabaseNonceStore(makeClient())
     await store.create({
