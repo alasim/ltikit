@@ -43,4 +43,9 @@ create index if not exists idx_lti_nonces_expires_at on public.lti_nonces (expir
 alter table public.lti_platforms enable row level security;
 alter table public.lti_nonces enable row level security;
 
+-- The service-role bypasses RLS but still needs table privileges. Grant ONLY to
+-- service_role (the tool's server client); anon/authenticated get nothing.
+grant select, insert, update, delete on public.lti_platforms to service_role;
+grant select, insert, update, delete on public.lti_nonces to service_role;
+
 commit;
