@@ -58,6 +58,11 @@ export function oidcLogin(lti: Lti, options: OidcLoginBindingOptions) {
     const redirectUri =
       typeof options.redirectUri === 'function' ? options.redirectUri(req) : options.redirectUri
 
+    // Carry the platform's storage-frame target (LTI Platform Storage) through to
+    // launch via the server-side nonce, so the client can bootstrap a session
+    // without a third-party cookie. Absent on platforms that don't support it.
+    const ltiStorageTarget = str(form.get('lti_storage_target'))
+
     try {
       const { redirectUrl } = await lti.oidc.login({
         iss,
@@ -66,6 +71,7 @@ export function oidcLogin(lti: Lti, options: OidcLoginBindingOptions) {
         clientId: str(form.get('client_id')),
         ltiMessageHint: str(form.get('lti_message_hint')),
         redirectUri,
+        data: ltiStorageTarget ? { ltiStorageTarget } : undefined,
       })
       return Response.redirect(redirectUrl, 303)
     } catch (err) {

@@ -40,10 +40,16 @@ export const POST = launch(lti, (result) => {
       userId: result.claims.sub,
     }),
   )
-  const res = new Response(null, {
-    status: 303,
-    headers: { Location: `${APP_URL}/launched?sim=${encodeURIComponent(simulationId)}` },
-  })
+  // Pass the platform origin + storage-frame target to the landing page so it can
+  // demo a cookieless round-trip via LTI Platform Storage (Phase 8b). The target
+  // was captured from the login params and round-tripped through the nonce.
+  const storageTarget = (result.nonceData?.ltiStorageTarget as string | undefined) ?? ''
+  const platformOrigin = new URL(result.platform.issuer).origin
+  const landing = new URL(`${APP_URL}/launched`)
+  landing.searchParams.set('sim', simulationId)
+  landing.searchParams.set('origin', platformOrigin)
+  if (storageTarget) landing.searchParams.set('storageTarget', storageTarget)
+  const res = new Response(null, { status: 303, headers: { Location: landing.toString() } })
   res.headers.append('Set-Cookie', sameSiteNoneCookie('ltikit_ags', agsContext, { maxAgeSec: 3600 }))
 
   // Carry the NRPS (roster) context when the launch includes it (instructor + tool

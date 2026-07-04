@@ -25,6 +25,12 @@ export default function Home() {
           Dynamic registration: <code>/api/lti/register</code>
         </li>
       </ul>
+      <p style={{ fontSize: '0.9rem', color: '#555' }}>
+        After a launch, the landing page runs an <strong>LTI Platform Storage</strong> round-trip —
+        proving the session can be carried without a third-party cookie (works in Safari / Firefox,
+        where iframe cookies are blocked). Falls back to <code>Partitioned</code> cookies when the
+        platform sends no storage target.
+      </p>
     </main>
   )
 }
