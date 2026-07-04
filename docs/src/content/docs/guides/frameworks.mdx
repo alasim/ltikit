@@ -1,0 +1,62 @@
+---
+title: Framework bindings
+description: Wire the routes with your framework — pick one.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components'
+
+<Aside type="tip">
+Optional choice. Bindings are thin adapters from an HTTP request to the core and back. Use a prebuilt one, or
+wire the three routes yourself with Web-standard `Request`/`Response` — the core doesn't care.
+</Aside>
+
+Every tool exposes three routes: **OIDC login**, **launch**, and **JWKS**. Pick how you wire them.
+
+<Tabs syncKey="framework">
+  <TabItem label="Next.js">
+    ```ts
+    // app/api/lti/login/route.ts
+    export const POST = oidcLogin(lti, { redirectUri: `${APP_URL}/api/lti/launch` })
+
+    // app/api/lti/launch/route.ts
+    export const POST = launch(lti, async (result) => {
+      /* create session (see Auth integration) */ return sessionRedirect({ to: '/home', cookies: [] })
+    })
+
+    // app/.well-known/jwks.json/route.ts
+    export const GET = jwks(lti)
+    ```
+    From `@ltikit/next`. Also exports iframe helpers (`cspFrameAncestors`, `sameSiteNoneCookie`,
+    `sessionRedirect`, `frameResizeScript`).
+  </TabItem>
+
+  <TabItem label="Hono">
+    ```ts
+    import { oidcLogin, launch, jwks } from '@ltikit/hono'
+
+    app.post('/api/lti/login', oidcLogin(lti, { redirectUri: `${APP_URL}/api/lti/launch` }))
+    app.post('/api/lti/launch', launch(lti, async (result, c) => c.redirect('/home')))
+    app.get('/.well-known/jwks.json', jwks(lti))
+    ```
+    From `@ltikit/hono` (`hono` is a peer dependency).
+  </TabItem>
+
+  <TabItem label="Hand-rolled (any runtime)">
+    The core is framework-free — call it directly and return a Web `Response`. This is all a binding does.
+
+    ```ts
+    // login: parse the form POST, then:
+    const { redirectUrl } = await lti.oidc.login({ iss, loginHint, targetLinkUri, clientId, redirectUri })
+    return Response.redirect(redirectUrl, 303)
+
+    // launch:
+    const result = await lti.launch({ idToken, state }) // throws on invalid → return 400
+    // create your session, then redirect
+
+    // jwks:
+    return Response.json(await lti.jwks())
+    ```
+
+    Works on Cloudflare Workers, Deno, Bun, Remix, SvelteKit — anywhere with `fetch`.
+  </TabItem>
+</Tabs>

@@ -1,0 +1,132 @@
+---
+title: Quickstart
+description: Stand up an LTI 1.3 tool with LTIkit.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components'
+
+<Aside type="note">
+You provide: the **core** + a **KeyStore** (your keypair) + a **NonceStore** + a **PlatformStore** + one
+**route binding**. Pick the storage and framework below — everything else is the same. See
+[How it fits together](../how-it-fits/) for the map.
+</Aside>
+
+## Install
+
+```bash
+npm i @ltikit/core
+```
+
+…plus one storage adapter and (optionally) one framework binding — chosen below.
+
+## 1. Create the LTIkit instance
+
+Pick your storage. (Full Supabase setup: [Supabase adapter](../../guides/supabase-adapter/); all options:
+[Storage adapters](../../guides/storage/).)
+
+<Tabs syncKey="storage">
+  <TabItem label="Supabase">
+    ```ts
+    // lib/lti.ts
+    import { createClient } from '@supabase/supabase-js'
+    import { createLti, staticKeyStore } from '@ltikit/core'
+    import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
+
+    const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false },
+    })
+    const client = admin as unknown as SupabaseLike
+
+    export const lti = createLti({
+      keys: staticKeyStore({
+        privateKeyPem: process.env.LTI_TOOL_PRIVATE_KEY!,
+        kid: process.env.LTI_TOOL_KEY_ID ?? 'ltikit-key-1',
+        publicJwk: JSON.parse(process.env.LTI_TOOL_PUBLIC_JWK!),
+      }),
+      platforms: supabasePlatformStore(client),
+      nonces: supabaseNonceStore(client),
+    })
+    ```
+  </TabItem>
+  <TabItem label="Redis + Supabase">
+    ```ts
+    import { createLti, staticKeyStore } from '@ltikit/core'
+    import { supabasePlatformStore, type SupabaseLike } from '@ltikit/adapter-supabase'
+    import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
+    import { Redis } from '@upstash/redis'
+
+    export const lti = createLti({
+      keys: staticKeyStore({ /* … */ }),
+      platforms: supabasePlatformStore(client as SupabaseLike),
+      nonces: redisNonceStore(fromUpstash(Redis.fromEnv())), // fast serverless nonces
+    })
+    ```
+  </TabItem>
+  <TabItem label="Memory (dev)">
+    ```ts
+    import { createLti, staticKeyStore } from '@ltikit/core'
+    import { MemoryNonceStore, MemoryPlatformStore } from '@ltikit/adapter-memory'
+
+    export const lti = createLti({
+      keys: staticKeyStore({ /* … */ }),
+      platforms: new MemoryPlatformStore([/* seed Platform[] */]),
+      nonces: new MemoryNonceStore(),
+    })
+    ```
+  </TabItem>
+</Tabs>
+
+## 2. Wire the routes
+
+<Tabs syncKey="framework">
+  <TabItem label="Next.js">
+    ```ts
+    // app/api/lti/login/route.ts
+    import { oidcLogin } from '@ltikit/next'
+    import { lti } from '@/lib/lti'
+    export const POST = oidcLogin(lti, { redirectUri: `${process.env.APP_URL}/api/lti/launch` })
+    ```
+    ```ts
+    // app/api/lti/launch/route.ts
+    import { launch, sessionRedirect } from '@ltikit/next'
+    import { ltiIdentity } from '@ltikit/core'
+    import { lti } from '@/lib/lti'
+    export const POST = launch(lti, async (result) => {
+      const id = ltiIdentity(result.claims) // → create user + session (see Auth integration)
+      return sessionRedirect({ to: `${process.env.APP_URL}/home`, cookies: [/* your session cookie */] })
+    })
+    ```
+    ```ts
+    // app/.well-known/jwks.json/route.ts
+    import { jwks } from '@ltikit/next'
+    import { lti } from '@/lib/lti'
+    export const GET = jwks(lti)
+    ```
+  </TabItem>
+  <TabItem label="Hono">
+    ```ts
+    import { oidcLogin, launch, jwks } from '@ltikit/hono'
+    import { ltiIdentity } from '@ltikit/core'
+
+    app.post('/api/lti/login', oidcLogin(lti, { redirectUri: `${APP_URL}/api/lti/launch` }))
+    app.post('/api/lti/launch', launch(lti, async (result, c) => c.redirect('/home')))
+    app.get('/.well-known/jwks.json', jwks(lti))
+    ```
+  </TabItem>
+</Tabs>
+
+## 3. Database + keypair
+
+- Apply the adapter schema (Supabase): `npx @ltikit/adapter-supabase > supabase/migrations/0001_ltikit.sql`.
+- Generate an RS256 keypair for `LTI_TOOL_PRIVATE_KEY` / `LTI_TOOL_PUBLIC_JWK`.
+
+## 4. Register with the LMS
+
+Point your LMS at the routes (JWKS = `/.well-known/jwks.json`, OIDC login = `/api/lti/login`, redirect URI =
+`/api/lti/launch`) and add a platform row. See [LMS registration](../../guides/lms-registration/).
+
+## Next steps
+
+- [How it fits together](../how-it-fits/) — required core vs your choices.
+- [Auth integration](../../guides/auth-integration/) — turn the launch into a real session.
+- [Running in an iframe](../../guides/iframe/) — CSP + cookies for LMS embedding.

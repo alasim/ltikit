@@ -1,0 +1,66 @@
+---
+title: How it fits together
+description: What LTIkit requires, and what you get to choose.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components'
+
+LTIkit is a small **required core** plus a few **swappable slots**. You don't adopt a stack — you keep yours
+and plug it in. This page is the map.
+
+## Anatomy
+
+```mermaid
+flowchart TD
+  LMS["LMS<br/>(Canvas / Moodle)"] -->|"OIDC + launch"| Binding["Framework binding<br/>Next / Hono / your own"]
+  Binding --> Core["@ltikit/core<br/><b>REQUIRED</b>"]
+  Core --> Keys["KeyStore"]
+  Core --> Nonce["NonceStore"]
+  Core --> Plat["PlatformStore"]
+  Core -->|"verified claims"| App["Your app<br/>(session + auth)"]
+  App -. "pick one" .-> AuthLib["Supabase Auth / NextAuth<br/>better-auth / custom JWT"]
+  Nonce -. "pick one" .-> NStore["memory / Supabase / Redis"]
+  Plat -. "pick one" .-> PStore["Supabase / your own"]
+
+  classDef req fill:#4f46e5,color:#fff,stroke:#4f46e5;
+  classDef pick fill:none,stroke-dasharray:4 3;
+  class Core req;
+  class AuthLib,NStore,PStore pick;
+```
+
+Solid boxes are things you always have; dashed boxes are choices.
+
+## What's required vs. what you choose
+
+| Piece | Required? | Your options |
+|---|---|---|
+| `@ltikit/core` | **Always** | — (the toolkit) |
+| `KeyStore` (your RS256 keypair) | **Always** | `staticKeyStore` (env PEM) · your KMS |
+| `NonceStore` (OIDC handshake state) | **Always** | memory · **Supabase** · **Redis** · your own |
+| `PlatformStore` (trusted LMSs) | **Always** | **Supabase** · your own |
+| HTTP glue (route handlers) | **Always** | `@ltikit/next` · `@ltikit/hono` · hand-rolled `Request`→`Response` |
+| Session / auth | **Your app** | Supabase Auth · NextAuth · better-auth · custom JWT |
+
+<Aside type="tip">
+The whole job: provide those three adapter interfaces (or drop in a prebuilt adapter) and one route binding.
+Everything else — deep linking, grades, roster — is stack-agnostic and works the same regardless of your choices.
+</Aside>
+
+## Choose your pieces
+
+<CardGrid>
+  <LinkCard title="Storage adapters" href="../guides/storage/" description="Where nonces + platforms live: Supabase, Redis, memory, or your own." />
+  <LinkCard title="Framework bindings" href="../guides/frameworks/" description="Wire routes with Next.js, Hono, or plain Web Request/Response." />
+  <LinkCard title="Auth integration" href="../guides/auth-integration/" description="Turn a verified launch into a session with your existing auth library." />
+</CardGrid>
+
+## LTI features (any stack)
+
+These work the same no matter what you picked above:
+
+<CardGrid>
+  <LinkCard title="Deep linking" href="../guides/deep-linking/" description="Let instructors select content the LMS places." />
+  <LinkCard title="Grade passback (AGS)" href="../guides/grade-passback/" description="Post scores to the gradebook." />
+  <LinkCard title="Roster (NRPS)" href="../guides/roster/" description="Fetch course members." />
+  <LinkCard title="Running in an iframe" href="../guides/iframe/" description="CSP + cookies for LMS embedding." />
+</CardGrid>

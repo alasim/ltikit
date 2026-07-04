@@ -8,12 +8,12 @@ hero:
     - text: Quickstart
       link: getting-started/quickstart/
       icon: right-arrow
-    - text: Why LTIkit
-      link: introduction/
+    - text: How it fits together
+      link: getting-started/how-it-fits/
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components'
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components'
 
 <CardGrid>
   <Card title="Stateless core" icon="rocket">
@@ -29,3 +29,15 @@ import { Card, CardGrid } from '@astrojs/starlight/components'
     The cross-LMS gotchas (Canvas + Moodle) are baked in — grade passback, deep linking, and SSO that actually work.
   </Card>
 </CardGrid>
+
+## Keep your stack
+
+A small required core, and the rest is your choice. Pick each independently:
+
+<CardGrid>
+  <LinkCard title="Storage adapters" href="guides/storage/" description="Supabase, Redis, memory, or your own." />
+  <LinkCard title="Framework bindings" href="guides/frameworks/" description="Next.js, Hono, or plain Web Request/Response." />
+  <LinkCard title="Auth integration" href="guides/auth-integration/" description="Supabase Auth, NextAuth, better-auth, or custom JWT." />
+</CardGrid>
+
+New to how the pieces relate? Start with [How it fits together](getting-started/how-it-fits/).

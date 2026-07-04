@@ -3,6 +3,13 @@ title: Supabase adapter
 description: PlatformStore + NonceStore on Supabase/Postgres.
 ---
 
+import { Aside } from '@astrojs/starlight/components'
+
+<Aside type="tip">
+Optional — one storage option, not a requirement. See [Storage adapters](../storage/) for the alternatives
+(Redis, memory, or your own). This page is the full Supabase setup.
+</Aside>
+
 `@ltikit/adapter-supabase` maps two tables — `lti_platforms` (registered LMSs) and `lti_nonces` (OIDC
 handshake state) — onto the core stores. Use the **service-role** client (server-only; bypasses RLS).
 

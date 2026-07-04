@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config'
+import mermaid from 'astro-mermaid'
 import starlight from '@astrojs/starlight'
 import starlightTypeDoc, { typeDocSidebarGroup } from 'starlight-typedoc'
 import starlightLlmsTxt from 'starlight-llms-txt'
@@ -13,6 +14,8 @@ export default defineConfig({
   site: SITE,
   base: BASE,
   integrations: [
+    // Render ```mermaid code blocks (theme-aware). Must run before Starlight.
+    mermaid({ theme: 'default', autoTheme: true }),
     starlight({
       title: 'LTIkit',
       description:
@@ -40,27 +43,39 @@ export default defineConfig({
           label: 'Start here',
           items: [
             { label: 'Introduction', slug: 'introduction' },
+            { label: 'How it fits together', slug: 'getting-started/how-it-fits' },
             { label: 'Quickstart', slug: 'getting-started/quickstart' },
             { label: 'Concepts', slug: 'getting-started/concepts' },
           ],
         },
         {
-          label: 'Guides',
+          label: 'LTI features',
+          collapsed: false,
           items: [
-            { label: 'Auth integration', slug: 'guides/auth-integration' },
             { label: 'LMS registration', slug: 'guides/lms-registration' },
-            { label: 'Running in an iframe', slug: 'guides/iframe' },
             { label: 'Deep linking', slug: 'guides/deep-linking' },
             { label: 'Grade passback (AGS)', slug: 'guides/grade-passback' },
             { label: 'Roster (NRPS)', slug: 'guides/roster' },
-            { label: 'Supabase adapter', slug: 'guides/supabase-adapter' },
+            { label: 'Running in an iframe', slug: 'guides/iframe' },
+          ],
+        },
+        {
+          label: 'Your stack (pick one each)',
+          items: [
+            { label: 'Storage adapters', slug: 'guides/storage' },
+            { label: 'Framework bindings', slug: 'guides/frameworks' },
+            { label: 'Auth integration', slug: 'guides/auth-integration' },
+            { label: 'Supabase adapter (setup)', slug: 'guides/supabase-adapter' },
           ],
         },
         // Auto-generated API reference group.
         typeDocSidebarGroup,
         {
           label: 'Reference',
-          items: [{ label: 'Gotchas', slug: 'gotchas' }],
+          items: [
+            { label: 'Capabilities', slug: 'reference/capabilities' },
+            { label: 'Gotchas', slug: 'gotchas' },
+          ],
         },
       ],
     }),

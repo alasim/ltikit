@@ -20,6 +20,22 @@ AGS score:   ags.publishScore() → getToken (client_credentials) → POST {line
 JWKS:        LMS ──GET──▶ jwks()  (verifies our signed assertions / deep-link responses)
 ```
 
+The OIDC + launch handshake:
+
+```mermaid
+sequenceDiagram
+  participant LMS
+  participant Tool as Your tool (binding)
+  participant Core as "@ltikit/core"
+  LMS->>Tool: POST /login (iss, login_hint)
+  Tool->>Core: oidc.login()
+  Core-->>LMS: 303 → platform auth (state + nonce)
+  LMS->>Tool: POST /launch (id_token, state)
+  Tool->>Core: launch() — verify sig + single-use nonce + claims
+  Core-->>Tool: LaunchResult (verified claims)
+  Tool-->>LMS: your session cookie + redirect
+```
+
 ## The two JWT directions (the central idea)
 
 | | Signer | Verifier | `aud` |

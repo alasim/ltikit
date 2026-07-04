@@ -1,0 +1,81 @@
+---
+title: Storage adapters
+description: Where nonces and platforms live — pick one (or mix).
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components'
+
+<Aside type="tip">
+Optional choice — not a required technology. LTIkit needs two small stores; use a prebuilt adapter or
+implement the interfaces yourself. You can even **mix** (e.g. Redis for nonces + Supabase for platforms).
+</Aside>
+
+LTIkit needs two things persisted:
+
+- **`NonceStore`** — the OIDC handshake state. Must be **single-use** + TTL (replay defense). Short-lived.
+- **`PlatformStore`** — the registry of trusted LMSs. Durable config.
+
+Pick the backing store below. (See [How it fits together](../../getting-started/how-it-fits/) for where these sit.)
+
+<Tabs syncKey="storage">
+  <TabItem label="Supabase">
+    Postgres via Supabase. Full setup (schema + CLI) is on the [Supabase adapter](../supabase-adapter/) page.
+
+    ```ts
+    import { createClient } from '@supabase/supabase-js'
+    import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
+
+    const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } })
+    const client = admin as unknown as SupabaseLike
+
+    // in createLti({ ... }):
+    platforms: supabasePlatformStore(client),
+    nonces: supabaseNonceStore(client),
+    ```
+  </TabItem>
+
+  <TabItem label="Redis">
+    Redis / Upstash — great for serverless nonces (single-use via atomic `GETDEL`). Redis is the **nonce**
+    store; platforms are durable config, so keep them in Supabase or your own store.
+
+    ```ts
+    import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
+    import { Redis } from '@upstash/redis'
+
+    const nonces = redisNonceStore(fromUpstash(Redis.fromEnv()))
+    // platforms: supabasePlatformStore(...) or your own
+    ```
+
+    Also ships `fromIoRedis` and `fromNodeRedis`.
+  </TabItem>
+
+  <TabItem label="Memory">
+    In-memory — **dev and tests only** (state is per-process; can't enforce single-use across serverless
+    invocations).
+
+    ```ts
+    import { MemoryNonceStore, MemoryPlatformStore } from '@ltikit/adapter-memory'
+
+    const nonces = new MemoryNonceStore()
+    const platforms = new MemoryPlatformStore([/* seed Platform[] */])
+    ```
+  </TabItem>
+
+  <TabItem label="Custom">
+    Implement the interfaces against any store. `consume` MUST be atomic fetch-and-delete (single-use).
+
+    ```ts
+    import type { NonceStore, PlatformStore } from '@ltikit/core'
+
+    const nonces: NonceStore = {
+      async create(rec) { /* persist rec with rec.ttlSec expiry */ },
+      async consume(state) { /* atomic get+delete; null if missing/expired */ return null },
+    }
+    const platforms: PlatformStore = {
+      async find(iss, clientId) { /* look up by issuer (+clientId); map to Platform */ return null },
+    }
+    ```
+
+    Verify with the shared conformance kit: `import { nonceStoreConformance } from '@ltikit/core/testing'`.
+  </TabItem>
+</Tabs>
