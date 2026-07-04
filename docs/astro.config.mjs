@@ -26,8 +26,10 @@ export default defineConfig({
           entryPoints: [
             '../packages/core/src/index.ts',
             '../packages/next/src/index.ts',
+            '../packages/hono/src/index.ts',
             '../packages/adapter-supabase/src/index.ts',
             '../packages/adapter-memory/src/index.ts',
+            '../packages/adapter-redis/src/index.ts',
           ],
           tsconfig: '../tsconfig.base.json',
           typeDoc: { skipErrorChecking: true },
@@ -50,6 +52,7 @@ export default defineConfig({
             { label: 'Running in an iframe', slug: 'guides/iframe' },
             { label: 'Deep linking', slug: 'guides/deep-linking' },
             { label: 'Grade passback (AGS)', slug: 'guides/grade-passback' },
+            { label: 'Roster (NRPS)', slug: 'guides/roster' },
             { label: 'Supabase adapter', slug: 'guides/supabase-adapter' },
           ],
         },

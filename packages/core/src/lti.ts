@@ -13,6 +13,8 @@ import { oidcLogin, type OidcLoginParams, type OidcLoginResult } from './oidc'
 import { launch as runLaunch, type LaunchInput, type LaunchResult } from './launch'
 import * as ags from './ags'
 import type { AgsDeps, LineItem, LineItemFilter, PublishScoreArgs, Result, Score } from './ags'
+import * as nrps from './nrps'
+import type { GetMembersOptions, MembershipResult } from './nrps'
 import { signDeepLinkResponse, deepLinkForm } from './deep-linking'
 import type { DeepLinkResponse, SignDeepLinkArgs } from './deep-linking'
 import {
@@ -67,10 +69,21 @@ export interface LtiDeepLinking {
   form(response: DeepLinkResponse): string
 }
 
+/** NRPS (roster) namespace on the `Lti` instance. */
+export interface LtiNrps {
+  /** Fetch all members of a context (course), following pagination. */
+  getMembers(
+    platform: Platform,
+    contextMembershipsUrl: string,
+    opts?: GetMembersOptions,
+  ): Promise<MembershipResult>
+}
+
 export interface Lti {
   oidc: { login(params: OidcLoginParams): Promise<OidcLoginResult> }
   launch(input: LaunchInput): Promise<LaunchResult>
   ags: LtiAgs
+  nrps: LtiNrps
   deepLinking: LtiDeepLinking
   /** Serve from your `/jwks` route so the LMS can verify our signed messages. */
   jwks(): Promise<JSONWebKeySet>
@@ -121,6 +134,9 @@ export function createLti(config: LtiConfig): Lti {
         },
       },
       publishScore: (args) => ags.publishScore(agsDeps, args),
+    },
+    nrps: {
+      getMembers: (platform, url, opts) => nrps.getMembers(agsDeps, platform, url, opts),
     },
     deepLinking: {
       signResponse: (args) => signDeepLinkResponse(config.keys, args),

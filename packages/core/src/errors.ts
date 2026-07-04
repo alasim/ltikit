@@ -63,3 +63,17 @@ export class AgsError extends LtikitError {
     this.status = options?.status
   }
 }
+
+/** An NRPS (Names & Role Provisioning) service call failed. */
+export class NrpsError extends LtikitError {
+  /** HTTP status of the failed response, when the failure was an HTTP error. */
+  readonly status?: number
+
+  constructor(
+    message = 'NRPS service request failed',
+    options?: LtikitErrorOptions & { status?: number },
+  ) {
+    super('NRPS_REQUEST_FAILED', message, options)
+    this.status = options?.status
+  }
+}

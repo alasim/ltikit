@@ -98,6 +98,12 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/adapter-redis:
+    dependencies:
+      '@ltikit/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/adapter-supabase:
     dependencies:
       '@ltikit/core':
@@ -115,6 +121,19 @@ importers:
       vitest:
         specifier: ^2 || ^3
         version: 2.1.9(@types/node@24.13.2)
+
+  packages/hono:
+    dependencies:
+      '@ltikit/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      hono:
+        specifier: ^4.6.0
+        version: 4.12.27
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
 
   packages/next:
     dependencies:
@@ -2223,6 +2242,10 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+
+  hono@4.12.27:
+    resolution: {integrity: sha512-1yrb/+w6HWQJrUCLkJ2IF5jNIPvvFkblV5RNOYl6bV+OA6p9GLcMpHFFGTosSvHvcAUibuUukRqhlYI4z32C7Q==}
+    engines: {node: '>=16.9.0'}
 
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
@@ -5905,6 +5928,8 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.2.0
       space-separated-tokens: 2.0.2
+
+  hono@4.12.27: {}
 
   html-escaper@3.0.3: {}
 

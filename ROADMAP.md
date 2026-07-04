@@ -2,7 +2,7 @@
 
 Phased, **review-gated** delivery. We complete **one phase at a time**; at the end of each phase I present the deliverable + exit criteria, you review, and only on your **confirm** do we start the next phase. See `DESIGN.md` for architecture.
 
-> **Status:** Phases 0–5 complete and live-verified (SSO + deep link + grade passback against MoodleCloud via `examples/next-demo`). Auth integration (helpers + guide) and the **docs site** (`docs/`, Astro Starlight + TypeDoc + llms.txt, deployed to GitHub Pages) landed alongside Phase 5. Next: Phase 6.
+> **Status:** Phases 0–6 complete; Phase 5 live-verified (SSO + deep link + grade passback against MoodleCloud via `examples/next-demo`). Phase 6 adds NRPS (`nrps.getMembers` with pagination), `@ltikit/adapter-redis`, and `@ltikit/hono`. Auth integration (helpers + guide) and the **docs site** (`docs/`, Astro Starlight + TypeDoc + llms.txt, GitHub Pages) also landed. Next: Phase 7 (docs/hardening/1.0-rc).
 
 ## Working agreement
 - Each phase has **Deliverables** + **Exit criteria** (objective "done" checks) + a **Review gate**.

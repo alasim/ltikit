@@ -31,9 +31,11 @@ interfaces, plus thin per-framework bindings. It runs anywhere JS runs, includin
 
 | Package | Purpose |
 |---|---|
-| `@ltikit/core` | The stateless core: JWT verify/sign, OIDC login, launch, AGS, deep linking, identity. |
+| `@ltikit/core` | The stateless core: JWT verify/sign, OIDC login, launch, AGS, NRPS, deep linking, identity. |
 | `@ltikit/next` | Next.js App Router bindings (Web-standard `Request`/`Response`) + iframe helpers. |
+| `@ltikit/hono` | Hono route bindings. |
 | `@ltikit/adapter-supabase` | `PlatformStore` + `NonceStore` on Supabase/Postgres. |
+| `@ltikit/adapter-redis` | `NonceStore` on Redis / Upstash (serverless-friendly single-use). |
 | `@ltikit/adapter-memory` | In-memory adapters for dev/tests. |
 
 It is extracted from a production integration verified against **Canvas** and **MoodleCloud** (hosted and
