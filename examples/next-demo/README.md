@@ -60,16 +60,101 @@ Generate an RS256 keypair and set `LTI_TOOL_PRIVATE_KEY` (PKCS8 PEM) + `LTI_TOOL
 Copy `.env.example` → `.env.local` and fill in `APP_URL` + the keypair. With the bundled
 local Supabase (Option A), the Supabase URL/key defaults are already set.
 
-### 4. Register your LMS
+### 4. Register the tool in the LMS
 
-- Add a `lti_platforms` row (via `supabase/seed.sql` + `pnpm db:reset`, or Studio).
-- Register the tool in the LMS with these endpoints: JWKS = `/.well-known/jwks.json`,
-  OIDC login = `/api/lti/login`, redirect URI = `/api/lti/launch`.
+Your tool's public base URL (`APP_URL`) drives every endpoint. Example below uses a dev
+tunnel — replace it with yours (it MUST be HTTPS and **publicly reachable without auth**, so
+the LMS can fetch your JWKS and post launches server-to-server):
+
+```
+APP_URL = https://8p8jtvqs-3000.asse.devtunnels.ms
+```
+
+| Tool endpoint | URL |
+|---|---|
+| OIDC login (initiation) | `APP_URL` + `/api/lti/login` |
+| Launch / redirect target | `APP_URL` + `/api/lti/launch` |
+| Deep-link (content selection) | `APP_URL` + `/api/lti/launch` |
+| Public JWKS (keyset) | `APP_URL` + `/.well-known/jwks.json` |
+
+> This demo routes **both** resource-link and deep-link launches through the same OIDC entry
+> and the same `/api/lti/launch` handler (it branches on `message_type`). So the launch URL,
+> the redirect URI, and the content-selection URL are all `/api/lti/launch`.
+
+#### Moodle — "Configure a tool manually" (LTI 1.3)
+
+_Site administration → Plugins → Activity modules → External tool → Manage tools → configure a tool manually._
+
+| Moodle field | Value |
+|---|---|
+| Tool name | ltikit demo |
+| Tool URL | `APP_URL`/api/lti/launch |
+| LTI version | LTI 1.3 |
+| Public key type | Keyset URL |
+| Public keyset | `APP_URL`/.well-known/jwks.json |
+| Initiate login URL | `APP_URL`/api/lti/login |
+| Redirection URI(s) | `APP_URL`/api/lti/launch |
+| Supports Deep Linking (Content-Item Message) | ✅ enabled |
+| Content Selection URL | `APP_URL`/api/lti/launch |
+| Default launch container | Embed / New window (your choice) |
+
+Services / Privacy on the same form:
+
+| Setting | Value |
+|---|---|
+| IMS LTI Assignment and Grade Services | **Use this service for grade sync and column management** (full AGS → enables grade passback) |
+| IMS LTI Names and Role Provisioning | Do not use (NRPS lands in a later ltikit phase) |
+| Share launcher's name / email | As needed (Yes to identify users) |
+| Accept grades from the tool | Yes |
+
+#### Copy Moodle's values back into `lti_platforms`
+
+After saving, open the tool card → **View configuration details** (the tool details icon). Map
+those values into your platform row:
+
+| `lti_platforms` column | Moodle "Tool configuration details" field |
+|---|---|
+| `issuer` | Platform ID (your Moodle base URL, e.g. `https://yoursite.moodlecloud.com`) |
+| `client_id` | Client ID |
+| `auth_endpoint` | Authentication request URL |
+| `token_endpoint` | Access token URL |
+| `keyset_url` | Public keyset URL |
+| `deployment_id` | Deployment ID |
+
+```sql
+insert into public.lti_platforms
+  (issuer, client_id, auth_endpoint, token_endpoint, keyset_url, deployment_id)
+values (
+  'https://yoursite.moodlecloud.com',                       -- Platform ID
+  'PASTE_CLIENT_ID',                                        -- Client ID
+  'https://yoursite.moodlecloud.com/mod/lti/auth.php',      -- Authentication request URL
+  'https://yoursite.moodlecloud.com/mod/lti/token.php',     -- Access token URL
+  'https://yoursite.moodlecloud.com/mod/lti/certs.php',     -- Public keyset URL
+  'PASTE_DEPLOYMENT_ID'                                     -- Deployment ID
+)
+on conflict (issuer, client_id) do update set
+  auth_endpoint  = excluded.auth_endpoint,
+  token_endpoint = excluded.token_endpoint,
+  keyset_url     = excluded.keyset_url,
+  deployment_id  = excluded.deployment_id;
+```
+
+> **Deployment ID** appears only after the tool is activated (Moodle shows it in the tool
+> configuration details once available). You can insert the row first and update
+> `deployment_id` after. If you leave it null, the launch still verifies — ltikit only
+> enforces a match when the column is set.
+
+#### Canvas (quick note)
+
+Same URL mapping, different field names: **Redirect URIs** = `/api/lti/launch`, **OpenID
+Connect Initiation Url** = `/api/lti/login`, **JWK Method = Public JWK URL** =
+`/.well-known/jwks.json`, **Target Link URI** = `/api/lti/launch`. Canvas issuer is
+`https://canvas.instructure.com` (hosted **and** most self-hosted).
 
 ### 5. Run
 
-`pnpm dev`, expose it over HTTPS (e.g. ngrok — LMS iframes require `Secure` cookies), then
-launch from the LMS.
+`pnpm dev`, make sure `APP_URL` matches your public HTTPS tunnel, then launch from the LMS.
+LMS iframes require `SameSite=None; Secure` cookies — HTTPS is mandatory.
 
 ## Notes
 
