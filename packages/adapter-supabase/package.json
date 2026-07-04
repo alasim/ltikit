@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/adapter-supabase",
-  "version": "0.0.0",
+  "version": "1.0.0-rc.0",
   "description": "Supabase/Postgres PlatformStore + NonceStore adapters for ltikit.",
   "license": "MIT",
   "type": "module",
@@ -14,7 +14,11 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "sql", "bin"],
+  "files": [
+    "dist",
+    "sql",
+    "bin"
+  ],
   "bin": {
     "ltikit-supabase-sql": "bin/print-sql.mjs"
   },

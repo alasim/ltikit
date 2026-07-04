@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/hono",
-  "version": "0.0.0",
+  "version": "1.0.0-rc.0",
   "description": "Hono route bindings for ltikit.",
   "license": "MIT",
   "type": "module",
@@ -14,7 +14,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",

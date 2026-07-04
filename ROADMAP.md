@@ -2,7 +2,7 @@
 
 Phased, **review-gated** delivery. We complete **one phase at a time**; at the end of each phase I present the deliverable + exit criteria, you review, and only on your **confirm** do we start the next phase. See `DESIGN.md` for architecture.
 
-> **Status:** Phases 0–6 complete; Phase 5 live-verified (SSO + deep link + grade passback against MoodleCloud via `examples/next-demo`). Phase 6 adds NRPS (`nrps.getMembers` with pagination), `@ltikit/adapter-redis`, and `@ltikit/hono`. Auth integration (helpers + guide) and the **docs site** (`docs/`, Astro Starlight + TypeDoc + llms.txt, GitHub Pages) also landed. Next: Phase 7 (docs/hardening/1.0-rc).
+> **Status:** Phases 0–6 complete; Phase 5 live-verified (SSO + deep link + grade passback against MoodleCloud via `examples/next-demo`). Phase 6 adds NRPS (`nrps.getMembers` with pagination), `@ltikit/adapter-redis`, and `@ltikit/hono`. Auth integration (helpers + guide) and the **docs site** (`docs/`, Astro Starlight + TypeDoc + llms.txt, GitHub Pages) also landed. Next: Phase 7 — trimmed to release mechanics only (semver freeze + Changesets 1.0-rc canary); TokenCache skipped, iframe helpers ship as-is, deep docs pass deferred.
 
 ## Working agreement
 - Each phase has **Deliverables** + **Exit criteria** (objective "done" checks) + a **Review gate**.
@@ -106,15 +106,19 @@ Phased, **review-gated** delivery. We complete **one phase at a time**; at the e
 
 ---
 
-## Phase 7 — Docs, hardening, 1.0-rc
+## Phase 7 — Release mechanics, 1.0-rc (scope trimmed 2026-07-05)
 **Deliverables**
-- Docs site / README set: quickstart, adapter guide, Canvas/Moodle setup, the "gotchas" reference, migration-from-ltijs note.
-- **Implement the deferred decisions**: `TokenCache` adapter (if chosen), iframe helper set (final depth).
+- Decision A (TokenCache): **skip** — no target consumer doing bulk AGS/NRPS at launch. Ship without it; revisit post-1.0 if demand shows up.
+- Decision B (iframe helper depth): **ship as-is** — CSP builder, cookie preset, `frameResize` from Phase 5 stand as final v1 depth. Platform Storage stays Phase 8.
 - Semver freeze of the public surface; `0.x → 1.0-rc`.
+- Changesets canary publish wired into CI.
+- Docs: existing Starlight site + README (landed Phase 5/6) are sufficient for 1.0-rc — no deep polish pass required.
 
 **Exit criteria**
-- Docs cover every exported API; a new user can integrate from docs alone.
-- CI publishes canaries via Changesets.
+- Public API frozen (no breaking changes without a major bump).
+- CI publishes a `1.0-rc` canary via Changesets.
+
+*(Full "docs cover every exported API" pass deferred — no longer a Phase 7 gate.)*
 
 ---
 
