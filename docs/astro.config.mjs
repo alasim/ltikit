@@ -14,7 +14,7 @@ export default defineConfig({
   base: BASE,
   integrations: [
     starlight({
-      title: 'ltikit',
+      title: 'LTIkit',
       description:
         'Runtime-, storage-, and framework-agnostic LTI 1.3 (LTI Advantage) toolkit — jose + fetch, bring your own DB.',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/your-org/ltikit' }],

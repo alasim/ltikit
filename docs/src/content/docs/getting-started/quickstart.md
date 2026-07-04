@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Stand up an LTI 1.3 tool with ltikit.
+description: Stand up an LTI 1.3 tool with LTIkit.
 ---
 
 ## Install
@@ -9,7 +9,7 @@ description: Stand up an LTI 1.3 tool with ltikit.
 npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase
 ```
 
-## 1. Create the ltikit instance
+## 1. Create the LTIkit instance
 
 ```ts
 // lib/lti.ts

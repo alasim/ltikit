@@ -1,6 +1,6 @@
 ---
 title: Gotchas
-description: Field-verified cross-LMS pitfalls, baked into ltikit or called out here.
+description: Field-verified cross-LMS pitfalls, baked into LTIkit or called out here.
 ---
 
 Hard-won fixes from real Canvas + Moodle integrations. Most are handled for you; the rest are things only

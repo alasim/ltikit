@@ -1,6 +1,6 @@
 # @ltikit/docs
 
-The ltikit documentation site — [Astro Starlight](https://starlight.astro.build/). Includes an
+The LTIkit documentation site — [Astro Starlight](https://starlight.astro.build/). Includes an
 auto-generated API reference (TypeDoc from each package's TSDoc) and LLM-friendly output
 (`/llms.txt`, `/llms-full.txt`).
 

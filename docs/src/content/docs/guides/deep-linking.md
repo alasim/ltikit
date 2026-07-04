@@ -3,7 +3,7 @@ title: Deep linking
 description: Let instructors select content that the LMS places (and grades).
 ---
 
-Deep Linking lets an instructor pick content in your UI; the LMS then places it as an activity. ltikit signs
+Deep Linking lets an instructor pick content in your UI; the LMS then places it as an activity. LTIkit signs
 the response; the picker UI is yours (content is app-specific).
 
 ## Flow

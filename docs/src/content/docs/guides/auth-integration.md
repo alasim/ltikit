@@ -3,7 +3,7 @@ title: Auth integration
 description: Turn a verified LTI launch into a real logged-in session — with any auth stack.
 ---
 
-ltikit is **auth-agnostic**. It verifies the launch and hands you verified claims; **you** create the
+LTIkit is **auth-agnostic**. It verifies the launch and hands you verified claims; **you** create the
 user and session with whatever you already use. This guide shows the seam and four concrete recipes.
 
 ## The seam
@@ -79,7 +79,7 @@ TeachSim `upsertLtiProfile` pattern.
 
 Two options:
 
-**A. Credentials provider** — sign in with the verified `sub` (trusted, since ltikit already verified it):
+**A. Credentials provider** — sign in with the verified `sub` (trusted, since LTIkit already verified it):
 
 ```ts
 // in the launch handler, after upserting the user:
@@ -159,4 +159,4 @@ Verify the JWT in your middleware on subsequent requests.
 - Relying on `email` → breaks for no-email users. Key on `sub`.
 - Setting the session on a later page instead of the launch response → the cross-site POST has no session yet.
 - Third-party cookie deprecation → add `Partitioned` (CHIPS); the long-term fix is the LTI Platform Storage
-  (cookieless) spec, on the ltikit roadmap.
+  (cookieless) spec, on the LTIkit roadmap.

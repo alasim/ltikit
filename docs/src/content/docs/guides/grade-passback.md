@@ -39,7 +39,7 @@ Lower-level pieces are also available: `lti.ags.getToken`, `lti.ags.score.submit
 
 ## Baked-in gotchas
 
-ltikit encodes the cross-LMS AGS pitfalls so you don't rediscover them:
+LTIkit encodes the cross-LMS AGS pitfalls so you don't rediscover them:
 
 - **`/scores` goes in the path before the query string** (Canvas line items carry `?type_id=N`).
 - **Assertion `aud` = the token endpoint**, not the issuer.

@@ -1,6 +1,6 @@
 ---
 title: Concepts
-description: The LTI 1.3 flows and how ltikit models them.
+description: The LTI 1.3 flows and how LTIkit models them.
 ---
 
 ## The pieces
@@ -24,8 +24,8 @@ JWKS:        LMS ──GET──▶ jwks()  (verifies our signed assertions / de
 
 | | Signer | Verifier | `aud` |
 |---|---|---|---|
-| Inbound launch (`id_token`) | LMS | ltikit (via `platform.keysetUrl`) | tool `clientId` |
-| Outbound assertion (AGS token, deep-link response) | ltikit (`KeyStore`) | LMS (via our `jwks()`) | `platform.tokenEndpoint` (assertion) / issuer (DL) |
+| Inbound launch (`id_token`) | LMS | LTIkit (via `platform.keysetUrl`) | tool `clientId` |
+| Outbound assertion (AGS token, deep-link response) | LTIkit (`KeyStore`) | LMS (via our `jwks()`) | `platform.tokenEndpoint` (assertion) / issuer (DL) |
 
 ## Security model
 
