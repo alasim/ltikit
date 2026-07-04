@@ -64,6 +64,20 @@ export class AgsError extends LtikitError {
   }
 }
 
+/** Dynamic Registration (fetch platform config or POST tool config) failed. */
+export class RegistrationError extends LtikitError {
+  /** HTTP status of the failed response, when the failure was an HTTP error. */
+  readonly status?: number
+
+  constructor(
+    message = 'Dynamic registration failed',
+    options?: LtikitErrorOptions & { status?: number },
+  ) {
+    super('REGISTRATION_FAILED', message, options)
+    this.status = options?.status
+  }
+}
+
 /** An NRPS (Names & Role Provisioning) service call failed. */
 export class NrpsError extends LtikitError {
   /** HTTP status of the failed response, when the failure was an HTTP error. */

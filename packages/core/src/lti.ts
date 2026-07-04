@@ -7,10 +7,17 @@
 import type { JSONWebKeySet } from 'jose'
 import type { KeyStore, KeySet } from './keys'
 import { jwks as buildJwks } from './keys'
+import { isMutablePlatformStore } from './adapters'
 import type { NonceStore, PlatformStore } from './adapters'
 import type { Platform } from './types'
 import { oidcLogin, type OidcLoginParams, type OidcLoginResult } from './oidc'
 import { launch as runLaunch, type LaunchInput, type LaunchResult } from './launch'
+import {
+  dynamicRegister,
+  type RegistrationParams,
+  type RegistrationResult,
+} from './registration'
+import { RegistrationError } from './errors'
 import * as ags from './ags'
 import type { AgsDeps, LineItem, LineItemFilter, PublishScoreArgs, Result, Score } from './ags'
 import * as nrps from './nrps'
@@ -69,6 +76,16 @@ export interface LtiDeepLinking {
   form(response: DeepLinkResponse): string
 }
 
+/** Dynamic Registration namespace on the `Lti` instance. */
+export interface LtiDynamicRegistration {
+  /**
+   * Run the OIDC dynamic-registration handshake and persist the new platform.
+   * Requires a `MutablePlatformStore` — throws `RegistrationError` at call time
+   * if the configured `PlatformStore` is read-only.
+   */
+  register(params: RegistrationParams): Promise<RegistrationResult>
+}
+
 /** NRPS (roster) namespace on the `Lti` instance. */
 export interface LtiNrps {
   /** Fetch all members of a context (course), following pagination. */
@@ -84,6 +101,7 @@ export interface Lti {
   launch(input: LaunchInput): Promise<LaunchResult>
   ags: LtiAgs
   nrps: LtiNrps
+  dynamicRegistration: LtiDynamicRegistration
   deepLinking: LtiDeepLinking
   /** Serve from your `/jwks` route so the LMS can verify our signed messages. */
   jwks(): Promise<JSONWebKeySet>
@@ -137,6 +155,21 @@ export function createLti(config: LtiConfig): Lti {
     },
     nrps: {
       getMembers: (platform, url, opts) => nrps.getMembers(agsDeps, platform, url, opts),
+    },
+    dynamicRegistration: {
+      register: (params) => {
+        if (!isMutablePlatformStore(config.platforms)) {
+          return Promise.reject(
+            new RegistrationError(
+              'Dynamic registration requires a MutablePlatformStore (the configured PlatformStore is read-only)',
+            ),
+          )
+        }
+        return dynamicRegister(
+          { platforms: config.platforms, fetchTimeoutMs: config.options?.fetchTimeoutMs },
+          params,
+        )
+      },
     },
     deepLinking: {
       signResponse: (args) => signDeepLinkResponse(config.keys, args),

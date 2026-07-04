@@ -17,7 +17,7 @@
  *   // app/.well-known/jwks.json/route.ts  (or /api/lti/jwks)
  *   export const GET = jwks(lti)
  */
-import type { Lti, LaunchResult } from '@ltikit/core'
+import type { Lti, LaunchResult, RegistrationTool } from '@ltikit/core'
 
 function str(value: FormDataEntryValue | null): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null
@@ -101,6 +101,51 @@ export function launch(lti: Lti, handler: LaunchBindingHandler) {
       return errorJson(errorMessage(err), 400)
     }
     return handler(result, req)
+  }
+}
+
+export interface DynamicRegistrationBindingOptions {
+  /**
+   * The tool descriptor to register — either static, or derived from the
+   * incoming request (e.g. to build absolute URLs from the request host).
+   */
+  tool: RegistrationTool | ((req: Request) => RegistrationTool)
+}
+
+/**
+ * Auto-submitting close page: signals the LMS the tool finished registering.
+ * The LMS opens registration in a popup and listens for this postMessage.
+ */
+function registrationCompleteHtml(): string {
+  return `<!doctype html><html><body><script>
+(function(){var m={subject:'org.imsglobal.lti.close'};
+if(window.opener){window.opener.postMessage(m,'*');}
+else if(window.parent!==window){window.parent.postMessage(m,'*');}})();
+</script><p>Registration complete. You can close this window.</p></body></html>`
+}
+
+/**
+ * LTI Dynamic Registration initiation. The LMS opens this GET with
+ * `openid_configuration` + `registration_token` query params; we run the
+ * handshake via the core, persist the platform, and return the close page.
+ * Requires the `lti` instance to have a `MutablePlatformStore`.
+ */
+export function dynamicRegistration(lti: Lti, options: DynamicRegistrationBindingOptions) {
+  return async (req: Request): Promise<Response> => {
+    const url = new URL(req.url)
+    const openidConfiguration = url.searchParams.get('openid_configuration')
+    const registrationToken = url.searchParams.get('registration_token')
+    if (!openidConfiguration) {
+      return errorJson('Missing openid_configuration', 400)
+    }
+    const tool = typeof options.tool === 'function' ? options.tool(req) : options.tool
+
+    try {
+      await lti.dynamicRegistration.register({ openidConfiguration, registrationToken, tool })
+    } catch (err) {
+      return errorJson(errorMessage(err), 400)
+    }
+    return htmlResponse(registrationCompleteHtml())
   }
 }
 

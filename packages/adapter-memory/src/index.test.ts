@@ -1,11 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { nonceStoreConformance, platformStoreConformance } from '@ltikit/core/testing'
+import {
+  nonceStoreConformance,
+  platformStoreConformance,
+  mutablePlatformStoreConformance,
+} from '@ltikit/core/testing'
 import type { Platform } from '@ltikit/core'
 import { MemoryNonceStore, MemoryPlatformStore, version } from './index'
 
 // The shared conformance kit is the real coverage: single-use, TTL, issuer match.
 nonceStoreConformance(() => new MemoryNonceStore(), 'MemoryNonceStore')
 platformStoreConformance((seed: Platform[]) => new MemoryPlatformStore(seed), 'MemoryPlatformStore')
+mutablePlatformStoreConformance(() => new MemoryPlatformStore(), 'MemoryPlatformStore')
 
 describe('@ltikit/adapter-memory', () => {
   it('exports a version string', () => {

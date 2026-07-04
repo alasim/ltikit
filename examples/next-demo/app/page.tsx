@@ -3,7 +3,11 @@ export default function Home() {
     <main style={{ maxWidth: 640, margin: '3rem auto', fontFamily: 'system-ui' }}>
       <h1>ltikit demo tool</h1>
       <p>This app is launched from inside an LMS — it is not meant to be opened directly.</p>
-      <p>Register these endpoints in your LMS (Canvas / Moodle):</p>
+      <p>
+        <strong>Dynamic Registration (easiest):</strong> point your LMS&apos;s LTI 1.3 auto-config
+        at <code>/api/lti/register</code> — it onboards the platform automatically, no manual setup.
+      </p>
+      <p>Or register these endpoints manually in your LMS (Canvas / Moodle):</p>
       <ul>
         <li>
           OIDC login: <code>/api/lti/login</code>
@@ -16,6 +20,9 @@ export default function Home() {
         </li>
         <li>
           Deep link: <code>/api/lti/login</code> (same OIDC entry; message type differs)
+        </li>
+        <li>
+          Dynamic registration: <code>/api/lti/register</code>
         </li>
       </ul>
     </main>

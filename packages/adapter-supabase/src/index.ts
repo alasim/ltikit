@@ -13,10 +13,11 @@
  */
 import type {
   ConsumedNonce,
+  MutablePlatformStore,
   NonceRecord,
   NonceStore,
   Platform,
-  PlatformStore,
+  PlatformInput,
 } from '@ltikit/core'
 
 /** The minimal Supabase/PostgREST surface these adapters use. */
@@ -27,6 +28,7 @@ export interface SupabaseResult {
 export interface SupabaseQuery extends PromiseLike<SupabaseResult> {
   select(columns?: string): SupabaseQuery
   insert(values: Record<string, unknown>): SupabaseQuery
+  upsert(values: Record<string, unknown>, options?: { onConflict?: string }): SupabaseQuery
   delete(): SupabaseQuery
   eq(column: string, value: unknown): SupabaseQuery
   limit(count: number): SupabaseQuery
@@ -70,11 +72,15 @@ function mapPlatform(row: PlatformRow): Platform {
   }
 }
 
-/** `PlatformStore` reading rows from `lti_platforms`. */
+/**
+ * Writable `PlatformStore` backed by `lti_platforms`. `save` upserts on the
+ * `(issuer, client_id)` unique constraint (see the SQL migration), so Dynamic
+ * Registration can onboard platforms and backfill `deployment_id` at runtime.
+ */
 export function supabasePlatformStore(
   client: SupabaseLike,
   options: PlatformStoreOptions = {},
-): PlatformStore {
+): MutablePlatformStore {
   const table = options.table ?? 'lti_platforms'
   return {
     async find(iss, clientId) {
@@ -87,6 +93,30 @@ export function supabasePlatformStore(
         throw new Error(`ltikit: ${table} lookup failed for iss=${iss}: ${errorMessage(error)}`)
       }
       if (!data) return null
+      return mapPlatform(data as PlatformRow)
+    },
+    async save(input: PlatformInput) {
+      const { data, error } = await client
+        .from(table)
+        .upsert(
+          {
+            issuer: input.issuer,
+            client_id: input.clientId,
+            auth_endpoint: input.authEndpoint,
+            token_endpoint: input.tokenEndpoint,
+            keyset_url: input.keysetUrl,
+            deployment_id: input.deploymentId ?? null,
+          },
+          { onConflict: 'issuer,client_id' },
+        )
+        .select('*')
+        .maybeSingle()
+      if (error) {
+        throw new Error(`ltikit: ${table} upsert failed for iss=${input.issuer}: ${errorMessage(error)}`)
+      }
+      if (!data) {
+        throw new Error(`ltikit: ${table} upsert returned no row for iss=${input.issuer}`)
+      }
       return mapPlatform(data as PlatformRow)
     },
   }

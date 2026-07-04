@@ -43,3 +43,26 @@ export interface PlatformStore {
    */
   find(iss: string, clientId?: string | null): Promise<Platform | null>
 }
+
+/** A platform to persist — everything except the adapter-assigned `id`. */
+export type PlatformInput = Omit<Platform, 'id'>
+
+/**
+ * A writable `PlatformStore`. Required for Dynamic Registration, which onboards
+ * platforms at runtime (a read-only store rejects registration at config time).
+ */
+export interface MutablePlatformStore extends PlatformStore {
+  /**
+   * Upsert a platform keyed on `(issuer, clientId)`: insert a new registration,
+   * or update the endpoints (and backfill `deploymentId`) of an existing one.
+   * Returns the stored record with its assigned `id`.
+   */
+  save(platform: PlatformInput): Promise<Platform>
+}
+
+/** True if a `PlatformStore` also implements the mutable `save` contract. */
+export function isMutablePlatformStore(
+  store: PlatformStore,
+): store is MutablePlatformStore {
+  return typeof (store as MutablePlatformStore).save === 'function'
+}

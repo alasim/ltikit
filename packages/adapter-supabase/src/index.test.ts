@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { nonceStoreConformance, platformStoreConformance } from '@ltikit/core/testing'
+import {
+  nonceStoreConformance,
+  platformStoreConformance,
+  mutablePlatformStoreConformance,
+} from '@ltikit/core/testing'
 import type { Platform } from '@ltikit/core'
 import {
   supabaseNonceStore,
@@ -17,10 +21,11 @@ type Row = Record<string, unknown>
  * `delete().select()` returning the deleted rows (atomic single-use).
  */
 class FakeQuery implements SupabaseQuery {
-  private op: 'select' | 'insert' | 'delete' = 'select'
+  private op: 'select' | 'insert' | 'upsert' | 'delete' = 'select'
   private returning = false
   private filters: Array<[string, unknown]> = []
   private ins?: Row
+  private conflictCols: string[] = []
   private lim?: number
 
   constructor(private rows: Row[]) {}
@@ -32,6 +37,12 @@ class FakeQuery implements SupabaseQuery {
   insert(values: Row): SupabaseQuery {
     this.op = 'insert'
     this.ins = values
+    return this
+  }
+  upsert(values: Row, options?: { onConflict?: string }): SupabaseQuery {
+    this.op = 'upsert'
+    this.ins = values
+    this.conflictCols = options?.onConflict?.split(',').map((c) => c.trim()) ?? []
     return this
   }
   delete(): SupabaseQuery {
@@ -55,6 +66,19 @@ class FakeQuery implements SupabaseQuery {
     if (this.op === 'insert') {
       const row = { ...this.ins }
       this.rows.push(row)
+      return { data: this.returning ? [{ ...row }] : null, error: null }
+    }
+    if (this.op === 'upsert') {
+      const values = this.ins ?? {}
+      const existing = this.rows.find((r) => this.conflictCols.every((c) => r[c] === values[c]))
+      let row: Row
+      if (existing) {
+        Object.assign(existing, values)
+        row = existing
+      } else {
+        row = { id: `row-${this.rows.length + 1}`, ...values }
+        this.rows.push(row)
+      }
       return { data: this.returning ? [{ ...row }] : null, error: null }
     }
     if (this.op === 'delete') {
@@ -107,6 +131,7 @@ platformStoreConformance(
   (seed: Platform[]) => supabasePlatformStore(makeClient({ lti_platforms: seed.map(seedRow) })),
   'SupabasePlatformStore',
 )
+mutablePlatformStoreConformance(() => supabasePlatformStore(makeClient()), 'SupabasePlatformStore')
 
 describe('@ltikit/adapter-supabase mapping', () => {
   it('maps snake_case platform rows to the camelCase Platform shape', async () => {

@@ -5,7 +5,7 @@
  * (single-use nonces, TTL expiry, issuer matching). Requires `vitest`.
  */
 import { describe, it, expect } from 'vitest'
-import type { NonceStore, PlatformStore } from './adapters'
+import type { MutablePlatformStore, NonceStore, PlatformStore } from './adapters'
 import type { Platform } from './types'
 
 /** Assert a `NonceStore` implementation honours single-use + TTL semantics. */
@@ -86,6 +86,45 @@ export function platformStoreConformance(
     it('returns null when clientId is given but does not match', async () => {
       const store = makeStore([SAMPLE_PLATFORM])
       expect(await store.find(SAMPLE_PLATFORM.issuer, 'someone-else')).toBeNull()
+    })
+  })
+}
+
+/**
+ * Assert a `MutablePlatformStore` upserts on `(issuer, clientId)`: a fresh save
+ * inserts and is then findable; a second save for the same key updates in place
+ * (no duplicate) and backfills `deploymentId`. `makeStore` starts empty.
+ */
+export function mutablePlatformStoreConformance(
+  makeStore: () => MutablePlatformStore,
+  label = 'MutablePlatformStore',
+): void {
+  describe(`${label} conformance`, () => {
+    const input = {
+      issuer: 'https://lms.example',
+      clientId: 'client-9',
+      authEndpoint: 'https://lms.example/auth',
+      tokenEndpoint: 'https://lms.example/token',
+      keysetUrl: 'https://lms.example/jwks',
+      deploymentId: null,
+    }
+
+    it('saves a new platform and makes it findable', async () => {
+      const store = makeStore()
+      const saved = await store.save(input)
+      expect(saved.id).toBeTruthy()
+      expect(saved.clientId).toBe('client-9')
+      const found = await store.find(input.issuer, input.clientId)
+      expect(found?.id).toBe(saved.id)
+    })
+
+    it('upserts on (issuer, clientId) — no duplicate, backfills deploymentId', async () => {
+      const store = makeStore()
+      const first = await store.save(input)
+      const second = await store.save({ ...input, deploymentId: 'dep-42' })
+      expect(second.id).toBe(first.id)
+      const found = await store.find(input.issuer, input.clientId)
+      expect(found?.deploymentId).toBe('dep-42')
     })
   })
 }

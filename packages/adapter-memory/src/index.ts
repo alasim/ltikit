@@ -5,10 +5,11 @@
  */
 import type {
   ConsumedNonce,
+  MutablePlatformStore,
   NonceRecord,
   NonceStore,
   Platform,
-  PlatformStore,
+  PlatformInput,
 } from '@ltikit/core'
 
 interface StoredNonce {
@@ -42,9 +43,13 @@ export class MemoryNonceStore implements NonceStore {
   }
 }
 
-/** Fixed-list platform registry seeded at construction. */
-export class MemoryPlatformStore implements PlatformStore {
+/**
+ * In-memory platform registry (seedable at construction). Implements the
+ * writable `MutablePlatformStore` so Dynamic Registration works in dev/tests.
+ */
+export class MemoryPlatformStore implements MutablePlatformStore {
   private readonly platforms: Platform[]
+  private seq = 0
 
   constructor(platforms: Platform[] = []) {
     this.platforms = [...platforms]
@@ -58,6 +63,24 @@ export class MemoryPlatformStore implements PlatformStore {
     const byIssuer = this.platforms.filter((p) => p.issuer === iss)
     const match = clientId != null ? byIssuer.find((p) => p.clientId === clientId) : byIssuer[0]
     return Promise.resolve(match ?? null)
+  }
+
+  /** Upsert on `(issuer, clientId)`: update endpoints in place, or insert. */
+  save(input: PlatformInput): Promise<Platform> {
+    const existing = this.platforms.find(
+      (p) => p.issuer === input.issuer && p.clientId === input.clientId,
+    )
+    if (existing) {
+      // Refresh endpoints; backfill deploymentId but don't clobber a known one.
+      existing.authEndpoint = input.authEndpoint
+      existing.tokenEndpoint = input.tokenEndpoint
+      existing.keysetUrl = input.keysetUrl
+      if (input.deploymentId) existing.deploymentId = input.deploymentId
+      return Promise.resolve(existing)
+    }
+    const platform: Platform = { id: `mem-${++this.seq}`, ...input }
+    this.platforms.push(platform)
+    return Promise.resolve(platform)
   }
 }
 

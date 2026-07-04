@@ -54,3 +54,10 @@ export const NRPS_MEDIA_MEMBERSHIP = 'application/vnd.ims.lti-nrps.v2.membership
 export const OAUTH_GRANT_CLIENT_CREDENTIALS = 'client_credentials'
 export const OAUTH_CLIENT_ASSERTION_TYPE =
   'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+
+// --- Dynamic Registration (LTI Advantage) ---
+/** Tool-side config block in the registration request/response. */
+export const LTI_TOOL_CONFIGURATION = 'https://purl.imsglobal.org/spec/lti-tool-configuration'
+/** Platform-side config block in the platform's openid-configuration. */
+export const LTI_PLATFORM_CONFIGURATION =
+  'https://purl.imsglobal.org/spec/lti-platform-configuration'
