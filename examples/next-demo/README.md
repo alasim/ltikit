@@ -15,9 +15,14 @@ It does the full loop: **SSO launch → deep-link content selection → grade pa
 | `POST /api/lti/launch` | Launch callback — verifies id_token, routes by message type (`launch` binding) |
 | `POST /api/lti/deeplink` | Signs the deep-link response + auto-submits it back to the LMS |
 | `POST /api/lti/grade` | Posts a completion grade via AGS (`ags.publishScore`) |
+| `GET /api/lti/roster` | Fetches the course roster via NRPS (`nrps.getMembers`) |
 | `GET /.well-known/jwks.json` | Serves the tool's public keyset (`jwks` binding) |
 | `GET /lti/select` | Reference deep-link picker (app-owned UI) |
-| `GET /launched` | Student landing + "post grade" button |
+| `GET /launched` | Student landing + "post grade" + "view roster" buttons |
+
+To use the roster: in the Moodle tool config set **IMS LTI Names and Role Provisioning → Use this service**,
+then launch as an **instructor** (the NRPS endpoint is only sent on instructor launches). The "View roster"
+button on `/launched` calls `/api/lti/roster`.
 
 ## Setup
 

@@ -45,5 +45,17 @@ export const POST = launch(lti, (result) => {
     headers: { Location: `${APP_URL}/launched?sim=${encodeURIComponent(simulationId)}` },
   })
   res.headers.append('Set-Cookie', sameSiteNoneCookie('ltikit_ags', agsContext, { maxAgeSec: 3600 }))
+
+  // Carry the NRPS (roster) context when the launch includes it (instructor + tool
+  // authorized for Names & Roles). Used by /api/lti/roster.
+  if (result.nrps?.contextMembershipsUrl) {
+    const nrpsContext = encodeURIComponent(
+      JSON.stringify({
+        platform: result.platform,
+        contextMembershipsUrl: result.nrps.contextMembershipsUrl,
+      }),
+    )
+    res.headers.append('Set-Cookie', sameSiteNoneCookie('ltikit_nrps', nrpsContext, { maxAgeSec: 3600 }))
+  }
   return res
 })
