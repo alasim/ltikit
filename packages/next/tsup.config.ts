@@ -1,12 +1,10 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/testing.ts'],
+  entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   clean: true,
   sourcemap: true,
   treeshake: true,
-  // vitest is only used by the `testing` entry; never bundle it.
-  external: ['vitest'],
 })

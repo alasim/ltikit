@@ -1,7 +1,7 @@
 {
-  "name": "@ltikit/core",
+  "name": "@ltikit/adapter-supabase",
   "version": "0.0.0",
-  "description": "Runtime-agnostic LTI 1.3 (LTI Advantage) core — jose + fetch, no framework, no DB.",
+  "description": "Supabase/Postgres PlatformStore + NonceStore adapters for ltikit.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -12,28 +12,25 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./testing": {
-      "types": "./dist/testing.d.ts",
-      "import": "./dist/testing.js",
-      "require": "./dist/testing.cjs"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "sql", "bin"],
+  "bin": {
+    "ltikit-supabase-sql": "bin/print-sql.mjs"
+  },
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "jose": "^5.9.6"
+    "@ltikit/core": "workspace:*"
   },
   "peerDependencies": {
-    "vitest": "^2 || ^3"
+    "@supabase/supabase-js": ">=2"
   },
   "peerDependenciesMeta": {
-    "vitest": {
+    "@supabase/supabase-js": {
       "optional": true
     }
   },

@@ -49,3 +49,17 @@ export class NonceReplayError extends LtikitError {
     super('NONCE_REPLAY', message, options)
   }
 }
+
+/** An AGS/NRPS service call (token, line item, score, result) failed. */
+export class AgsError extends LtikitError {
+  /** HTTP status of the failed response, when the failure was an HTTP error. */
+  readonly status?: number
+
+  constructor(
+    message = 'AGS service request failed',
+    options?: LtikitErrorOptions & { status?: number },
+  ) {
+    super('AGS_REQUEST_FAILED', message, options)
+    this.status = options?.status
+  }
+}
