@@ -20,6 +20,14 @@ export default defineConfig({
       title: 'LTIkit',
       description:
         'Runtime-, storage-, and framework-agnostic LTI 1.3 (LTI Advantage) toolkit — jose + fetch, bring your own DB.',
+      // The square mark works on both themes; the title text ("LTIkit") renders beside it.
+      logo: { src: './src/assets/ltikit-mark.png', alt: 'LTIkit' },
+      favicon: '/favicon.png',
+      head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: `${SITE}${BASE}/og.png` } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: `${SITE}${BASE}/og.png` } },
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+      ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/your-org/ltikit' }],
       plugins: [
         // Generates /llms.txt + /llms-full.txt for LLM-friendly consumption.
