@@ -8,7 +8,7 @@ Runtime-, storage-, and framework-agnostic **LTI 1.3 (LTI Advantage)** toolkit f
 
 Runs on serverless and edge (Next.js, Hono, Cloudflare Workers, Lambda) — no Express, no MongoDB. Bring your own database via small adapters. Verified live against **Canvas** and **MoodleCloud**: SSO, deep linking, grade passback (AGS), and roster (NRPS).
 
-> **Status:** Phases 0–6 complete; live-verified on MoodleCloud. Full LTI Advantage surface (launch, deep linking, AGS, NRPS) + auth-agnostic session seam. See [`ROADMAP.md`](./ROADMAP.md) and [`DESIGN.md`](./DESIGN.md).
+> **Status (1.0-rc):** the full launch loop + LTI Advantage services (deep linking, AGS, NRPS), **Dynamic Registration**, and **cookieless launches (Platform Storage)** — live-verified against Canvas + MoodleCloud, with an auth-agnostic session seam. See the [**Roadmap**](https://alasim.github.io/ltikit/roadmap/) and [Capabilities](https://alasim.github.io/ltikit/reference/capabilities/) for the path to a complete LTI 1.3 toolkit (internal build process: [`ROADMAP.md`](./ROADMAP.md), design: [`DESIGN.md`](./DESIGN.md)).
 
 ## Why
 

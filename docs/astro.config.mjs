@@ -56,6 +56,8 @@ export default defineConfig({
             { label: 'Concepts', slug: 'getting-started/concepts' },
           ],
         },
+        // Standalone top-level item — the public feature roadmap.
+        { label: 'Roadmap', slug: 'roadmap' },
         {
           label: 'LTI features',
           collapsed: false,

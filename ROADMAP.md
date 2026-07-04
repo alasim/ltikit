@@ -1,4 +1,6 @@
-# ltikit — Roadmap
+# ltikit — Roadmap (internal build process)
+
+> **Public feature roadmap:** <https://alasim.github.io/ltikit/roadmap/> (+ the [Capabilities matrix](https://alasim.github.io/ltikit/reference/capabilities/)). That's the user-facing view of what's shipped/partial/planned toward a complete LTI 1.3 toolkit. **This file** is the internal, phase-based delivery process.
 
 Phased, **review-gated** delivery. We complete **one phase at a time**; at the end of each phase I present the deliverable + exit criteria, you review, and only on your **confirm** do we start the next phase. See `DESIGN.md` for architecture.
 
@@ -10,8 +12,9 @@ Phased, **review-gated** delivery. We complete **one phase at a time**; at the e
 - Every phase ends **green**: `pnpm build` + `pnpm test` pass; `@ltikit/core` stays framework/DB-free (lint-enforced).
 
 ## Locked decisions
-- **Dynamic Registration → v2** (not in the 1.0 line).
+- **Dynamic Registration** — originally deferred to v2; **built in Phase 8a** (live-verified on MoodleCloud) and now on the 1.0 line.
 - **LTI 1.1 / Basic Outcomes → out of scope.** 1.3 / Advantage only.
+- **Access-token caching (`TokenCache`)** — **skipped** for 1.0 (Phase 7); revisit in v1.x if bulk-AGS/NRPS demand appears.
 
 ## Decisions to make later (detail below, decide when we reach the phase)
 1. **Access-token caching** — Phase 7. 2. **Cookie/iframe helper depth** — Phase 5/7. 3. **Deep-link picker UI** — Phase 4/5. Full trade-offs in the appendix.
