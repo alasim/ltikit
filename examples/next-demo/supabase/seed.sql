@@ -1,0 +1,31 @@
+-- Seed data for the ltikit demo (loaded on `supabase db reset`).
+--
+-- Register your LMS platform here so it survives a DB reset. Fill in the real
+-- client_id / deployment_id from your LMS tool registration, then uncomment.
+-- (You can also insert it later from Studio at http://127.0.0.1:54423.)
+--
+-- Canvas example:
+-- insert into public.lti_platforms
+--   (issuer, client_id, auth_endpoint, token_endpoint, keyset_url, deployment_id)
+-- values (
+--   'https://canvas.instructure.com',
+--   'YOUR_CLIENT_ID',
+--   'https://sso.canvaslms.com/api/lti/authorize_redirect',
+--   'https://sso.canvaslms.com/login/oauth2/token',
+--   'https://sso.canvaslms.com/api/lti/security/jwks',
+--   'YOUR_DEPLOYMENT_ID'
+-- )
+-- on conflict (issuer, client_id) do nothing;
+--
+-- MoodleCloud example:
+-- insert into public.lti_platforms
+--   (issuer, client_id, auth_endpoint, token_endpoint, keyset_url, deployment_id)
+-- values (
+--   'https://YOURSITE.moodlecloud.com',
+--   'YOUR_CLIENT_ID',
+--   'https://YOURSITE.moodlecloud.com/mod/lti/auth.php',
+--   'https://YOURSITE.moodlecloud.com/mod/lti/token.php',
+--   'https://YOURSITE.moodlecloud.com/mod/lti/certs.php',
+--   'YOUR_DEPLOYMENT_ID'
+-- )
+-- on conflict (issuer, client_id) do nothing;

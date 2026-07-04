@@ -21,8 +21,32 @@ It does the full loop: **SSO launch → deep-link content selection → grade pa
 
 ## Setup
 
-1. **Database.** Apply `packages/adapter-supabase/sql/0001_ltikit_tables.sql` to your Supabase project.
-2. **Keypair.** Generate an RS256 keypair and set `LTI_TOOL_PRIVATE_KEY` (PKCS8 PEM) + `LTI_TOOL_PUBLIC_JWK` (public JWK JSON). Quick generator:
+### 1. Database
+
+**Option A — fresh local Supabase (bundled, recommended for testing).**
+This example ships its own Supabase project under `supabase/` with the ltikit tables
+as a migration. Ports are shifted +100 (API on `54421`) so it runs alongside another
+local Supabase without clashing. Requires Docker Desktop running.
+
+```bash
+pnpm db:start      # supabase start — boots Postgres/Studio/Auth, applies migrations
+pnpm db:status     # shows the local URLs + keys (API: http://127.0.0.1:54421)
+pnpm db:reset      # re-apply migrations + seed.sql from scratch
+```
+
+The default local service-role key is already in `.env.example` (it's the well-known
+local-dev key, not a secret). Register your LMS platform by editing `supabase/seed.sql`
+(then `pnpm db:reset`), or from Studio at http://127.0.0.1:54423.
+
+**Option B — your own Supabase project.** Apply the adapter schema:
+```bash
+npx @ltikit/adapter-supabase > supabase/migrations/0001_ltikit.sql   # then: supabase db push
+# or paste `npx @ltikit/adapter-supabase` into the Dashboard SQL editor
+```
+
+### 2. Keypair
+
+Generate an RS256 keypair and set `LTI_TOOL_PRIVATE_KEY` (PKCS8 PEM) + `LTI_TOOL_PUBLIC_JWK` (public JWK JSON). Quick generator:
    ```js
    // node --input-type=module
    import { generateKeyPair, exportPKCS8, exportJWK } from 'jose'
@@ -30,10 +54,22 @@ It does the full loop: **SSO launch → deep-link content selection → grade pa
    console.log('PRIVATE_KEY:\n' + (await exportPKCS8(privateKey)))
    console.log('PUBLIC_JWK:\n' + JSON.stringify({ ...(await exportJWK(publicKey)), kid: 'ltikit-key-1', alg: 'RS256', use: 'sig' }))
    ```
-3. **Env.** Copy `.env.example` → `.env.local` and fill it in.
-4. **Register the platform.** Insert a row into `lti_platforms` with your LMS's issuer, client_id, auth/token/keyset URLs, and deployment_id.
-5. **Register the tool in the LMS** with the endpoints above (JWKS = `/.well-known/jwks.json`, OIDC login = `/api/lti/login`, redirect URI = `/api/lti/launch`).
-6. `pnpm dev`, expose it over HTTPS (e.g. ngrok — LMS iframes require `Secure` cookies), and launch from the LMS.
+
+### 3. Env
+
+Copy `.env.example` → `.env.local` and fill in `APP_URL` + the keypair. With the bundled
+local Supabase (Option A), the Supabase URL/key defaults are already set.
+
+### 4. Register your LMS
+
+- Add a `lti_platforms` row (via `supabase/seed.sql` + `pnpm db:reset`, or Studio).
+- Register the tool in the LMS with these endpoints: JWKS = `/.well-known/jwks.json`,
+  OIDC login = `/api/lti/login`, redirect URI = `/api/lti/launch`.
+
+### 5. Run
+
+`pnpm dev`, expose it over HTTPS (e.g. ngrok — LMS iframes require `Secure` cookies), then
+launch from the LMS.
 
 ## Notes
 
