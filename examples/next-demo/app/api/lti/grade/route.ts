@@ -20,16 +20,31 @@ export async function POST(): Promise<Response> {
     userId: string
   }
 
-  await lti.ags.publishScore({
-    platform: ctx.platform,
-    lineItemUrl: ctx.lineItemUrl,
-    lineItemsUrl: ctx.lineItemsUrl,
-    resourceLinkId: ctx.resourceLinkId,
-    userId: ctx.userId,
-    scoreGiven: 2,
-    scoreMaximum: 2,
-    autoCreateLabel: 'ltikit demo',
-  })
+  try {
+    await lti.ags.publishScore({
+      platform: ctx.platform,
+      lineItemUrl: ctx.lineItemUrl,
+      lineItemsUrl: ctx.lineItemsUrl,
+      resourceLinkId: ctx.resourceLinkId,
+      userId: ctx.userId,
+      scoreGiven: 2,
+      scoreMaximum: 2,
+      autoCreateLabel: 'ltikit demo',
+    })
+  } catch (e) {
+    // Surface the exact AGS failure (which call + LMS body) for debugging.
+    console.error('[grade] AGS failed', {
+      lineItemUrl: ctx.lineItemUrl,
+      lineItemsUrl: ctx.lineItemsUrl,
+      resourceLinkId: ctx.resourceLinkId,
+      userId: ctx.userId,
+      message: e instanceof Error ? e.message : String(e),
+    })
+    return Response.json(
+      { error: e instanceof Error ? e.message : 'grade failed' },
+      { status: 502 },
+    )
+  }
 
   return Response.json({ ok: true })
 }
