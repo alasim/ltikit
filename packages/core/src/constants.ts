@@ -20,6 +20,11 @@ export const LTI_CLAIM_LAUNCH_PRESENTATION =
   'https://purl.imsglobal.org/spec/lti/claim/launch_presentation'
 export const LTI_CLAIM_TOOL_PLATFORM = 'https://purl.imsglobal.org/spec/lti/claim/tool_platform'
 
+// --- LIS roles (the `roles` claim; membership context roles) ---
+export const ROLE_INSTRUCTOR = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
+export const ROLE_LEARNER = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'
+export const ROLE_ADMIN = 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Administrator'
+
 // --- Deep Linking ---
 export const LTI_CLAIM_DEEP_LINKING =
   'https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings'

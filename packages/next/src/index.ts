@@ -138,6 +138,8 @@ export interface SameSiteNoneCookieOptions {
   /** Default true. */
   httpOnly?: boolean
   domain?: string
+  /** Emit `; Partitioned` (CHIPS) — future-proofs against third-party-cookie deprecation. */
+  partitioned?: boolean
 }
 
 /**
@@ -153,7 +155,43 @@ export function sameSiteNoneCookie(
   if (options.httpOnly ?? true) parts.push('HttpOnly')
   if (options.maxAgeSec !== undefined) parts.push(`Max-Age=${options.maxAgeSec}`)
   if (options.domain) parts.push(`Domain=${options.domain}`)
+  if (options.partitioned) parts.push('Partitioned')
   return parts.join('; ')
+}
+
+export interface SessionCookie {
+  name: string
+  value: string
+  maxAgeSec?: number
+  partitioned?: boolean
+}
+
+export interface SessionRedirectArgs {
+  /** Where to send the browser after establishing the session. */
+  to: string
+  /** Session cookie(s) to set — each written iframe-safe (SameSite=None; Secure). */
+  cookies?: SessionCookie[]
+  /** Redirect status (default 303 — correct after a POST launch). */
+  status?: 302 | 303
+}
+
+/**
+ * Build the standard launch response: set your session cookie(s) and redirect.
+ * ltikit stays auth-agnostic — you compute the cookie value with your own auth
+ * library; this just writes it so it survives the LMS iframe and redirects.
+ */
+export function sessionRedirect(args: SessionRedirectArgs): Response {
+  const headers = new Headers({ Location: args.to })
+  for (const c of args.cookies ?? []) {
+    headers.append(
+      'Set-Cookie',
+      sameSiteNoneCookie(c.name, c.value, {
+        maxAgeSec: c.maxAgeSec,
+        partitioned: c.partitioned,
+      }),
+    )
+  }
+  return new Response(null, { status: args.status ?? 303, headers })
 }
 
 /**

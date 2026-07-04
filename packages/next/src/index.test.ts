@@ -23,6 +23,7 @@ import {
   cspFrameAncestors,
   sameSiteNoneCookie,
   frameResizeScript,
+  sessionRedirect,
 } from './index'
 
 const KID = 'ltikit-next-1'
@@ -222,5 +223,38 @@ describe('iframe helpers', () => {
       '"https://canvas.instructure.com"',
     )
     expect(frameResizeScript()).toContain('lti.frameResize')
+  })
+
+  it('sameSiteNoneCookie can emit Partitioned', () => {
+    expect(sameSiteNoneCookie('s', 'v', { partitioned: true })).toContain('Partitioned')
+    expect(sameSiteNoneCookie('s', 'v')).not.toContain('Partitioned')
+  })
+})
+
+describe('sessionRedirect', () => {
+  it('303-redirects and sets each session cookie iframe-safe', () => {
+    const res = sessionRedirect({
+      to: 'https://tool.example/home',
+      cookies: [
+        { name: 'session', value: 'abc', maxAgeSec: 3600 },
+        { name: 'refresh', value: 'xyz', partitioned: true },
+      ],
+    })
+    expect(res.status).toBe(303)
+    expect(res.headers.get('location')).toBe('https://tool.example/home')
+    const setCookies = res.headers.getSetCookie()
+    expect(setCookies).toHaveLength(2)
+    expect(setCookies[0]).toContain('session=abc')
+    expect(setCookies[0]).toContain('SameSite=None')
+    expect(setCookies[0]).toContain('Secure')
+    expect(setCookies[0]).toContain('Max-Age=3600')
+    expect(setCookies[1]).toContain('refresh=xyz')
+    expect(setCookies[1]).toContain('Partitioned')
+  })
+
+  it('works with no cookies (plain redirect)', () => {
+    const res = sessionRedirect({ to: 'https://tool.example/x', status: 302 })
+    expect(res.status).toBe(302)
+    expect(res.headers.getSetCookie()).toHaveLength(0)
   })
 })
