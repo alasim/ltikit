@@ -1,0 +1,4 @@
+dist/
+.astro/
+# API reference is generated from TSDoc on every build — not committed.
+src/content/docs/api/

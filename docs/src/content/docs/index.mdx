@@ -1,0 +1,31 @@
+---
+title: ltikit
+description: Runtime-, storage-, and framework-agnostic LTI 1.3 (LTI Advantage) toolkit — jose + fetch, bring your own database.
+template: splash
+hero:
+  tagline: LTI 1.3 (LTI Advantage) for serverless and edge. Just jose + fetch, bring your own database.
+  actions:
+    - text: Quickstart
+      link: getting-started/quickstart/
+      icon: right-arrow
+    - text: Why ltikit
+      link: introduction/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+<CardGrid>
+  <Card title="Stateless core" icon="rocket">
+    Pure `jose` + `fetch` — no Express, no MongoDB. Runs on Node, edge, Cloudflare Workers, Deno, Bun.
+  </Card>
+  <Card title="Bring your own storage" icon="setting">
+    Nonces, platform registry, and keys sit behind small adapter interfaces. Supabase, Redis, memory — or your own.
+  </Card>
+  <Card title="Auth-agnostic" icon="approve-check">
+    ltikit hands you verified claims. Create your session with Supabase Auth, NextAuth, better-auth, or a custom JWT.
+  </Card>
+  <Card title="Field-hardened" icon="warning">
+    The cross-LMS gotchas (Canvas + Moodle) are baked in — grade passback, deep linking, and SSO that actually work.
+  </Card>
+</CardGrid>

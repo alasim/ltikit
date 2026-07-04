@@ -2,6 +2,8 @@
 
 Phased, **review-gated** delivery. We complete **one phase at a time**; at the end of each phase I present the deliverable + exit criteria, you review, and only on your **confirm** do we start the next phase. See `DESIGN.md` for architecture.
 
+> **Status:** Phases 0–5 complete and live-verified (SSO + deep link + grade passback against MoodleCloud via `examples/next-demo`). Auth integration (helpers + guide) and the **docs site** (`docs/`, Astro Starlight + TypeDoc + llms.txt, deployed to GitHub Pages) landed alongside Phase 5. Next: Phase 6.
+
 ## Working agreement
 - Each phase has **Deliverables** + **Exit criteria** (objective "done" checks) + a **Review gate**.
 - No phase starts before the previous is confirmed.

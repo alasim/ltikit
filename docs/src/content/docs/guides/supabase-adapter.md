@@ -1,0 +1,51 @@
+---
+title: Supabase adapter
+description: PlatformStore + NonceStore on Supabase/Postgres.
+---
+
+`@ltikit/adapter-supabase` maps two tables — `lti_platforms` (registered LMSs) and `lti_nonces` (OIDC
+handshake state) — onto the core stores. Use the **service-role** client (server-only; bypasses RLS).
+
+## 1. Create the tables
+
+The CLI prints the schema; apply it whichever way fits your setup:
+
+```bash
+# Supabase CLI (versioned migration)
+npx @ltikit/adapter-supabase > supabase/migrations/0001_ltikit.sql
+supabase db push
+
+# or Dashboard → SQL Editor → paste the output of:
+npx @ltikit/adapter-supabase
+
+# or any Postgres
+npx @ltikit/adapter-supabase | psql "$DATABASE_URL"
+```
+
+The schema enables RLS **and** grants table access to `service_role` (RLS bypass alone is not enough — a
+missing grant yields `permission denied`, code 42501). It uses `create table if not exists` and is safe to
+re-run.
+
+## 2. Wire the stores
+
+```ts
+import { createClient } from '@supabase/supabase-js'
+import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
+
+const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } })
+const client = admin as unknown as SupabaseLike // structurally compatible; no hard supabase dependency
+```
+
+`consume` is atomic (`delete … returning`), so a replayed `state` finds nothing → single-use nonces.
+
+## Coexisting with existing tables
+
+Already have `lti_platforms` / `lti_nonces` with a different shape? Use custom names and edit the SQL to match:
+
+```ts
+supabasePlatformStore(client, { table: 'ltikit_platforms' })
+supabaseNonceStore(client, { table: 'ltikit_nonces' })
+```
+
+`create table if not exists` silently skips a differently-shaped existing table, and the adapter then fails
+against the wrong columns — so don't reuse another integration's tables by accident.
