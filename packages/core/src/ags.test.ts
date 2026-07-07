@@ -187,6 +187,30 @@ describe('postScore', () => {
     expect(typeof payload.timestamp).toBe('string')
   })
 
+  it('attaches the Canvas submission extension when canvasSubmission is given', async () => {
+    routes.push({ match: (u) => u.includes('/scores'), respond: () => new Response(null, { status: 200 }) })
+
+    await postScore(deps, CANVAS_LINE_ITEM, 'bearer-1', {
+      userId: 'lms-user-9',
+      scoreGiven: 2,
+      scoreMaximum: 2,
+      canvasSubmission: { type: 'basic_lti_launch', url: 'https://tool.example/lti/report/abc?t=xyz' },
+    })
+
+    const payload = JSON.parse(calls[0]!.body!)
+    expect(payload['https://canvas.instructure.com/lti/submission']).toEqual({
+      submission_type: 'basic_lti_launch',
+      submission_data: 'https://tool.example/lti/report/abc?t=xyz',
+    })
+  })
+
+  it('omits the Canvas submission extension when canvasSubmission is absent', async () => {
+    routes.push({ match: (u) => u.includes('/scores'), respond: () => new Response(null, { status: 200 }) })
+    await postScore(deps, CANVAS_LINE_ITEM, 'bearer-1', { userId: 'u', scoreGiven: 1, scoreMaximum: 2 })
+    const payload = JSON.parse(calls[0]!.body!)
+    expect(payload['https://canvas.instructure.com/lti/submission']).toBeUndefined()
+  })
+
   it('throws AgsError on a non-2xx score POST', async () => {
     routes.push({ match: (u) => u.includes('/scores'), respond: () => new Response('bad', { status: 422 }) })
     await expect(

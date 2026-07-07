@@ -52,6 +52,18 @@ export interface Score {
   comment?: string
   /** Default: now (ISO-8601). */
   timestamp?: string
+  /**
+   * Canvas-only AGS extension: attaches a review link to the score, surfaced
+   * as a clickable submission in SpeedGrader's central pane. Not part of the
+   * IMS AGS spec — Canvas-specific, ignored by other platforms.
+   * `type: 'basic_lti_launch'` opens `url` as an LTI launch inside SpeedGrader;
+   * `'online_url'` opens it as a plain link. See
+   * https://canvas.instructure.com/doc/api/score.html for the vendor extension.
+   */
+  canvasSubmission?: {
+    type: 'basic_lti_launch' | 'online_url'
+    url: string
+  }
 }
 
 /** A gradebook column (AGS Line Item). */
@@ -165,6 +177,14 @@ export async function postScore(
     gradingProgress: score.gradingProgress ?? 'FullyGraded',
     timestamp: score.timestamp ?? new Date().toISOString(),
     ...(score.comment ? { comment: score.comment } : {}),
+    ...(score.canvasSubmission
+      ? {
+          'https://canvas.instructure.com/lti/submission': {
+            submission_type: score.canvasSubmission.type,
+            submission_data: score.canvasSubmission.url,
+          },
+        }
+      : {}),
   }
 
   await ensureOk(
@@ -303,6 +323,8 @@ export interface PublishScoreArgs {
   comment?: string
   /** Label for a lazily-created line item (default `'ltikit'`). */
   autoCreateLabel?: string
+  /** Canvas-only: attach a SpeedGrader review link to the score. See `Score.canvasSubmission`. */
+  canvasSubmission?: Score['canvasSubmission']
 }
 
 /**
@@ -339,5 +361,6 @@ export async function publishScore(deps: AgsDeps, args: PublishScoreArgs): Promi
     scoreGiven: args.scoreGiven,
     scoreMaximum: args.scoreMaximum,
     comment: args.comment,
+    canvasSubmission: args.canvasSubmission,
   })
 }
