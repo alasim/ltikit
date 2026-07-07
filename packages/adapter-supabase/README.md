@@ -1,10 +1,12 @@
 # @ltikit/adapter-supabase
 
-Supabase/Postgres `PlatformStore` + `NonceStore` for [ltikit](https://github.com/). Bring your
-own Supabase project; this adds two small tables and maps them to the core stores.
+Supabase/Postgres `PlatformStore` + `NonceStore` for [LTIkit](https://github.com/alasim/ltikit).
+Bring your own Supabase project; this adds two small tables and maps them to the core stores.
+
+Requires [`@ltikit/core`](https://www.npmjs.com/package/@ltikit/core).
 
 ```bash
-npm i @ltikit/adapter-supabase
+npm i @ltikit/core @ltikit/adapter-supabase
 ```
 
 ## 1. Create the tables
@@ -86,3 +88,19 @@ will fail against the wrong columns.)
   finds nothing. Nonce carry-through (`data`) is stored as `jsonb`.
 - No hard dependency on `@supabase/supabase-js`: the client is accepted structurally
   (`SupabaseLike`), so any compatible client works and the package stays lightweight.
+- Also implements the writable `MutablePlatformStore` contract, so **Dynamic Registration**
+  auto-persists new platforms with no manual insert.
+
+## Docs
+
+- [Supabase adapter setup](https://alasim.github.io/ltikit/guides/supabase-adapter/)
+- [Storage adapters](https://alasim.github.io/ltikit/guides/storage/)
+- [API reference](https://alasim.github.io/ltikit/api/adapter-supabase/src/)
+
+## Links
+
+[Repository](https://github.com/alasim/ltikit) ·
+[Issues](https://github.com/alasim/ltikit/issues) ·
+[Need help?](https://alasim.github.io/ltikit/support/) — paid setup/integration help available.
+
+MIT

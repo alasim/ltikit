@@ -3,6 +3,14 @@
   "version": "1.0.0-rc.0",
   "description": "Runtime-agnostic LTI 1.3 (LTI Advantage) core — jose + fetch, no framework, no DB.",
   "license": "MIT",
+  "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",
+  "homepage": "https://alasim.github.io/ltikit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alasim/ltikit.git",
+    "directory": "packages/core"
+  },
+  "bugs": "https://github.com/alasim/ltikit/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

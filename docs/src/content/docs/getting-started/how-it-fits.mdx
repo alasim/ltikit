@@ -46,6 +46,24 @@ The whole job: provide those three adapter interfaces (or drop in a prebuilt ada
 Everything else — deep linking, grades, roster — is stack-agnostic and works the same regardless of your choices.
 </Aside>
 
+## Which packages do I need?
+
+Always start with `@ltikit/core`, then add **one** framework binding and **one** (or mixed)
+storage adapter. Pick the row that matches your stack:
+
+| Your stack | Install |
+|---|---|
+| Next.js + Supabase (most common) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
+| Next.js + Redis (nonces) + Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-supabase` |
+| Hono / edge (Workers, Deno, Bun) + Redis + Supabase | `npm i @ltikit/core @ltikit/hono @ltikit/adapter-redis @ltikit/adapter-supabase` |
+| Hand-rolled framework, your own storage | `npm i @ltikit/core` |
+| Local dev / tests only | `npm i -D @ltikit/core @ltikit/adapter-memory` |
+
+<Aside type="caution" title="Memory adapter">
+`@ltikit/adapter-memory` is dev/tests only — state is per-process and lost on restart, so it can't
+enforce single-use nonces across serverless invocations. Never ship it to production.
+</Aside>
+
 ## Choose your pieces
 
 <CardGrid>

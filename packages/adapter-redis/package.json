@@ -3,6 +3,14 @@
   "version": "1.0.0-rc.0",
   "description": "Redis / Upstash NonceStore adapter for ltikit.",
   "license": "MIT",
+  "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",
+  "homepage": "https://alasim.github.io/ltikit/guides/storage/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alasim/ltikit.git",
+    "directory": "packages/adapter-redis"
+  },
+  "bugs": "https://github.com/alasim/ltikit/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

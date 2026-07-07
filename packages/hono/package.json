@@ -3,6 +3,14 @@
   "version": "1.0.0-rc.0",
   "description": "Hono route bindings for ltikit.",
   "license": "MIT",
+  "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",
+  "homepage": "https://alasim.github.io/ltikit/guides/frameworks/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alasim/ltikit.git",
+    "directory": "packages/hono"
+  },
+  "bugs": "https://github.com/alasim/ltikit/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
