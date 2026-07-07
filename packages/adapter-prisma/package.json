@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/adapter-prisma",
-  "version": "0.1.0",
+  "version": "0.1.1-rc.0",
   "description": "Prisma PlatformStore + NonceStore adapters for ltikit — any Prisma-supported database.",
   "license": "MIT",
   "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",

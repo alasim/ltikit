@@ -9,9 +9,12 @@
     "@ltikit/adapter-supabase": "0.0.0",
     "@ltikit/core": "0.0.0",
     "@ltikit/hono": "0.0.0",
-    "@ltikit/next": "0.0.0"
+    "@ltikit/next": "0.0.0",
+    "@ltikit/example-next-prisma-demo": "0.0.1-rc.0",
+    "@ltikit/adapter-prisma": "0.1.0"
   },
   "changesets": [
-    "freeze-1-0-rc"
+    "freeze-1-0-rc",
+    "npm-metadata-readmes"
   ]
 }
