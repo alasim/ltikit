@@ -87,6 +87,8 @@ export default defineConfig({
             { label: 'Gotchas', slug: 'gotchas' },
           ],
         },
+        // Standalone top-level item — paid support + contact.
+        { label: 'Need help?', slug: 'support' },
       ],
     }),
   ],

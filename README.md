@@ -58,3 +58,15 @@ pnpm typecheck
 ```
 
 Monorepo: pnpm workspaces + Changesets. `@ltikit/core` is lint-enforced to depend only on `jose`.
+
+## Support
+
+LTIkit is free, open source, and maintained solo. If you'd rather not wire up Canvas/Moodle
+registration, grade passback, deep linking, or Platform Storage yourself, I offer paid setup help:
+
+- **Book a call:** [cal.com/alasim/30min](https://cal.com/alasim/30min)
+- **Email:** [alasim.mail@gmail.com](mailto:alasim.mail@gmail.com)
+
+A paid setup call is currently the best way to support ongoing maintenance — a tip jar (GitHub
+Sponsors) is planned but not live yet. See [Need help?](https://alasim.github.io/ltikit/support/)
+in the docs.
