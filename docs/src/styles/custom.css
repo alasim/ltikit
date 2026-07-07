@@ -1,0 +1,29 @@
+/* LTIkit brand — indigo accent (#4f46e5) applied to Starlight's accent tokens.
+   Two blocks: dark theme (Starlight's default :root) and light theme override. */
+
+:root {
+  --sl-color-accent-low: #2c2966;
+  --sl-color-accent: #4f46e5;
+  --sl-color-accent-high: #c7c4f7;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e2e0fb;
+  --sl-color-accent: #4f46e5;
+  --sl-color-accent-high: #2f2a8f;
+}
+
+/* Navbar wordmark logo — cap height so the wide lockup stays compact. */
+.site-title img {
+  height: 1.75rem;
+  width: auto;
+}
+
+/* Keep the combined-wordmark hero/banner images from stretching too wide on
+   large screens, and give the hero image a little breathing room. */
+.hero > img,
+.hero .hero-html img {
+  max-height: 22rem;
+  width: auto;
+  margin-inline: auto;
+}

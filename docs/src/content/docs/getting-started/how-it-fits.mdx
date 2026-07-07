@@ -18,9 +18,9 @@ flowchart TD
   Core --> Nonce["NonceStore"]
   Core --> Plat["PlatformStore"]
   Core -->|"verified claims"| App["Your app<br/>(session + auth)"]
-  App -. "pick one" .-> AuthLib["Supabase Auth / NextAuth<br/>better-auth / custom JWT"]
-  Nonce -. "pick one" .-> NStore["memory / Supabase / Redis"]
-  Plat -. "pick one" .-> PStore["Supabase / your own"]
+  App -. "pick one" .-> AuthLib["NextAuth / better-auth<br/>Supabase Auth / custom JWT"]
+  Nonce -. "pick one" .-> NStore["Prisma / Redis<br/>Supabase / memory"]
+  Plat -. "pick one" .-> PStore["Prisma / Supabase<br/>your own"]
 
   classDef req fill:#4f46e5,color:#fff,stroke:#4f46e5;
   classDef pick fill:none,stroke-dasharray:4 3;
@@ -36,10 +36,10 @@ Solid boxes are things you always have; dashed boxes are choices.
 |---|---|---|
 | `@ltikit/core` | **Always** | — (the toolkit) |
 | `KeyStore` (your RS256 keypair) | **Always** | `staticKeyStore` (env PEM) · your KMS |
-| `NonceStore` (OIDC handshake state) | **Always** | memory · **Supabase** · **Redis** · your own |
-| `PlatformStore` (trusted LMSs) | **Always** | **Supabase** · your own |
+| `NonceStore` (OIDC handshake state) | **Always** | Prisma · Redis · Supabase · memory · your own |
+| `PlatformStore` (trusted LMSs) | **Always** | Prisma · Supabase · your own |
 | HTTP glue (route handlers) | **Always** | `@ltikit/next` · `@ltikit/hono` · hand-rolled `Request`→`Response` |
-| Session / auth | **Your app** | Supabase Auth · NextAuth · better-auth · custom JWT |
+| Session / auth | **Your app** | NextAuth · better-auth · Supabase Auth · custom JWT |
 
 <Aside type="tip">
 The whole job: provide those three adapter interfaces (or drop in a prebuilt adapter) and one route binding.
@@ -53,9 +53,9 @@ storage adapter. Pick the row that matches your stack:
 
 | Your stack | Install |
 |---|---|
-| Next.js + Supabase (most common) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
-| Next.js + Redis (nonces) + Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-supabase` |
-| Next.js + Prisma/SQLite + NextAuth | `npm i @ltikit/core @ltikit/next @ltikit/adapter-prisma` |
+| Next.js + any DB via Prisma (SQLite, Postgres, MySQL — zero external service) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-prisma` |
+| Next.js + Supabase / Postgres | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
+| Next.js + Redis (nonces) + Prisma or Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-prisma` |
 | Hono / edge (Workers, Deno, Bun) + Redis + Supabase | `npm i @ltikit/core @ltikit/hono @ltikit/adapter-redis @ltikit/adapter-supabase` |
 | Hand-rolled framework, your own storage | `npm i @ltikit/core` |
 | Local dev / tests only | `npm i -D @ltikit/core @ltikit/adapter-memory` |
@@ -68,7 +68,7 @@ enforce single-use nonces across serverless invocations. Never ship it to produc
 ## Choose your pieces
 
 <CardGrid>
-  <LinkCard title="Storage adapters" href="../guides/storage/" description="Where nonces + platforms live: Supabase, Redis, memory, or your own." />
+  <LinkCard title="Storage adapters" href="../guides/storage/" description="Where nonces + platforms live: Prisma (any DB), Redis, Supabase, memory, or your own." />
   <LinkCard title="Framework bindings" href="../guides/frameworks/" description="Wire routes with Next.js, Hono, or plain Web Request/Response." />
   <LinkCard title="Auth integration" href="../guides/auth-integration/" description="Turn a verified launch into a session with your existing auth library." />
 </CardGrid>

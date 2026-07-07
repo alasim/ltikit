@@ -18,40 +18,10 @@ LTIkit needs two things persisted:
 Pick the backing store below. (See [How it fits together](../../getting-started/how-it-fits/) for where these sit.)
 
 <Tabs syncKey="storage">
-  <TabItem label="Supabase">
-    Postgres via Supabase. Full setup (schema + CLI) is on the [Supabase adapter](../supabase-adapter/) page.
-
-    ```ts
-    import { createClient } from '@supabase/supabase-js'
-    import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
-
-    const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } })
-    const client = admin as unknown as SupabaseLike
-
-    // in createLti({ ... }):
-    platforms: supabasePlatformStore(client),
-    nonces: supabaseNonceStore(client),
-    ```
-  </TabItem>
-
-  <TabItem label="Redis">
-    Redis / Upstash — great for serverless nonces (single-use via atomic `GETDEL`). Redis is the **nonce**
-    store; platforms are durable config, so keep them in Supabase or your own store.
-
-    ```ts
-    import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
-    import { Redis } from '@upstash/redis'
-
-    const nonces = redisNonceStore(fromUpstash(Redis.fromEnv()))
-    // platforms: supabasePlatformStore(...) or your own
-    ```
-
-    Also ships `fromIoRedis` and `fromNodeRedis`.
-  </TabItem>
-
   <TabItem label="Prisma">
-    Prisma, against any Prisma-supported database (SQLite, Postgres, MySQL, ...). Copy the two models
-    from the package's `prisma/schema.example.prisma` into your own schema, then:
+    Both stores, against any Prisma-supported database (SQLite, Postgres, MySQL, ...) — SQLite means zero
+    external service. Copy the two models into your schema; full setup on the
+    [Prisma adapter](../prisma-adapter/) page.
 
     ```ts
     import { PrismaClient } from '@prisma/client'
@@ -65,7 +35,39 @@ Pick the backing store below. (See [How it fits together](../../getting-started/
     ```
 
     No hard dependency on `@prisma/client` — the client is accepted structurally, so any generated
-    `PrismaClient` matching the two models works. See the [Prisma adapter](https://www.npmjs.com/package/@ltikit/adapter-prisma) package.
+    `PrismaClient` matching the two models works.
+  </TabItem>
+
+  <TabItem label="Redis">
+    Redis / Upstash — great for serverless nonces (single-use via atomic `GETDEL`). Redis is the **nonce**
+    store; platforms are durable config, so keep them in a durable store (Prisma, Supabase, or your own).
+    Full setup on the [Redis adapter](../redis-adapter/) page.
+
+    ```ts
+    import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
+    import { Redis } from '@upstash/redis'
+
+    const nonces = redisNonceStore(fromUpstash(Redis.fromEnv()))
+    // platforms: prismaPlatformStore(...) / supabasePlatformStore(...) or your own
+    ```
+
+    Also ships `fromIoRedis` and `fromNodeRedis`.
+  </TabItem>
+
+  <TabItem label="Supabase">
+    Postgres via Supabase. Full setup (schema + CLI + RLS) is on the [Supabase adapter](../supabase-adapter/) page.
+
+    ```ts
+    import { createClient } from '@supabase/supabase-js'
+    import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
+
+    const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } })
+    const client = admin as unknown as SupabaseLike
+
+    // in createLti({ ... }):
+    platforms: supabasePlatformStore(client),
+    nonces: supabaseNonceStore(client),
+    ```
   </TabItem>
 
   <TabItem label="Memory">

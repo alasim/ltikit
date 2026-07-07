@@ -11,6 +11,11 @@ You provide: the **core** + a **KeyStore** (your keypair) + a **NonceStore** + a
 [How it fits together](../how-it-fits/) for the map.
 </Aside>
 
+<Aside type="tip">
+Want to see it end-to-end first? The [Examples](../../examples/) are complete runnable tools —
+`next-prisma-demo` launches from a real LMS with zero external services (SQLite).
+</Aside>
+
 ## Install
 
 ```bash
@@ -21,13 +26,32 @@ npm i @ltikit/core
 
 ## 1. Create the LTIkit instance
 
-Pick your storage. (Full Supabase setup: [Supabase adapter](../../guides/supabase-adapter/); all options:
-[Storage adapters](../../guides/storage/).)
+Pick your storage — any of these work the same. (All options: [Storage adapters](../../guides/storage/).)
 
 <Tabs syncKey="storage">
-  <TabItem label="Supabase">
+  <TabItem label="Prisma (any DB)">
     ```ts
     // lib/lti.ts
+    import { PrismaClient } from '@prisma/client'
+    import { createLti, staticKeyStore } from '@ltikit/core'
+    import { prismaPlatformStore, prismaNonceStore } from '@ltikit/adapter-prisma'
+
+    const prisma = new PrismaClient() // SQLite for zero external service, or Postgres/MySQL
+
+    export const lti = createLti({
+      keys: staticKeyStore({
+        privateKeyPem: process.env.LTI_TOOL_PRIVATE_KEY!,
+        kid: process.env.LTI_TOOL_KEY_ID ?? 'ltikit-key-1',
+        publicJwk: JSON.parse(process.env.LTI_TOOL_PUBLIC_JWK!),
+      }),
+      platforms: prismaPlatformStore(prisma),
+      nonces: prismaNonceStore(prisma),
+    })
+    ```
+    Copy the two models first — see [Prisma adapter](../../guides/prisma-adapter/).
+  </TabItem>
+  <TabItem label="Supabase">
+    ```ts
     import { createClient } from '@supabase/supabase-js'
     import { createLti, staticKeyStore } from '@ltikit/core'
     import { supabasePlatformStore, supabaseNonceStore, type SupabaseLike } from '@ltikit/adapter-supabase'
@@ -38,27 +62,23 @@ Pick your storage. (Full Supabase setup: [Supabase adapter](../../guides/supabas
     const client = admin as unknown as SupabaseLike
 
     export const lti = createLti({
-      keys: staticKeyStore({
-        privateKeyPem: process.env.LTI_TOOL_PRIVATE_KEY!,
-        kid: process.env.LTI_TOOL_KEY_ID ?? 'ltikit-key-1',
-        publicJwk: JSON.parse(process.env.LTI_TOOL_PUBLIC_JWK!),
-      }),
+      keys: staticKeyStore({ /* … */ }),
       platforms: supabasePlatformStore(client),
       nonces: supabaseNonceStore(client),
     })
     ```
+    Full setup (tables + RLS): [Supabase adapter](../../guides/supabase-adapter/).
   </TabItem>
-  <TabItem label="Redis + Supabase">
+  <TabItem label="Redis + platforms">
     ```ts
     import { createLti, staticKeyStore } from '@ltikit/core'
-    import { supabasePlatformStore, type SupabaseLike } from '@ltikit/adapter-supabase'
     import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
     import { Redis } from '@upstash/redis'
 
     export const lti = createLti({
       keys: staticKeyStore({ /* … */ }),
-      platforms: supabasePlatformStore(client as SupabaseLike),
       nonces: redisNonceStore(fromUpstash(Redis.fromEnv())), // fast serverless nonces
+      platforms: prismaPlatformStore(prisma),                // durable — Prisma / Supabase / your own
     })
     ```
   </TabItem>
@@ -117,7 +137,11 @@ Pick your storage. (Full Supabase setup: [Supabase adapter](../../guides/supabas
 
 ## 3. Database + keypair
 
-- Apply the adapter schema (Supabase): `npx @ltikit/adapter-supabase > supabase/migrations/0001_ltikit.sql`.
+- Apply the adapter schema for the store you picked:
+  - **Prisma** — copy the two models into your `schema.prisma`, then `npx prisma migrate dev --name add_ltikit`.
+  - **Supabase** — `npx @ltikit/adapter-supabase > supabase/migrations/0001_ltikit.sql`.
+  - **Redis** — nothing to migrate (keys are created on write); pair with a durable `PlatformStore`.
+  - **Memory** — nothing to set up (dev/tests only).
 - Generate an RS256 keypair for `LTI_TOOL_PRIVATE_KEY` / `LTI_TOOL_PUBLIC_JWK`.
 
 ## 4. Register with the LMS

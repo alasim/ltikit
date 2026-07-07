@@ -1,0 +1,48 @@
+---
+title: Redis adapter
+description: A serverless-friendly NonceStore on Redis / Upstash.
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+<Aside type="tip">
+Optional — one storage option, not a requirement. See [Storage adapters](../storage/) for the alternatives
+(Prisma, Supabase, memory, or your own). This page is the full Redis setup.
+</Aside>
+
+`@ltikit/adapter-redis` provides the **`NonceStore`** only — ideal for serverless, where in-memory state
+can't enforce single-use nonces across cold invocations. Single-use is guaranteed by an atomic `GETDEL`.
+
+Redis holds the nonce store; **platforms are durable config**, so pair this with a durable
+`PlatformStore` — [Prisma](../prisma-adapter/), [Supabase](../supabase-adapter/), or your own.
+
+```bash
+npm i @ltikit/core @ltikit/adapter-redis
+```
+
+## Wire the store
+
+```ts
+import { createLti, staticKeyStore } from '@ltikit/core'
+import { redisNonceStore, fromUpstash } from '@ltikit/adapter-redis'
+import { Redis } from '@upstash/redis'
+
+export const lti = createLti({
+  keys: staticKeyStore({ /* ...your tool keypair... */ }),
+  nonces: redisNonceStore(fromUpstash(Redis.fromEnv())), // fast serverless nonces
+  platforms: prismaPlatformStore(prisma),                // or supabase / your own
+})
+```
+
+No hard dependency on any Redis client — `redisNonceStore` takes a structural `RedisLike`
+(`set` with TTL + atomic `getdel`). Ships helpers for the common clients:
+
+```ts
+import { fromUpstash, fromIoRedis, fromNodeRedis } from '@ltikit/adapter-redis'
+```
+
+## Notes
+
+- **Single-use** is enforced by `GETDEL`: a replayed `state` finds nothing → `consume` returns `null`.
+- Nonces are short-lived — the `create` call sets the key with the record's TTL, so expired handshakes
+  clean themselves up.

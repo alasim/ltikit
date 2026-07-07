@@ -46,6 +46,40 @@ contextId?, contextTitle?, resourceLinkId? }`.
 ## Recipes
 
 <Tabs syncKey="auth">
+  <TabItem label="NextAuth / Auth.js">
+    Either sign in via a Credentials provider with the verified `sub` (trusted — LTIkit already verified it), or
+    mint the Auth.js session JWT directly. Configure the session cookie for the iframe:
+
+    ```ts
+    // auth config
+    cookies: {
+      sessionToken: {
+        name: 'next-auth.session-token',
+        options: { httpOnly: true, sameSite: 'none', secure: true, path: '/' },
+      },
+    }
+    ```
+
+    A full working example (Next.js + Prisma + NextAuth) lives in
+    [`examples/next-prisma-demo`](https://github.com/alasim/ltikit/tree/main/examples/next-prisma-demo).
+  </TabItem>
+
+  <TabItem label="better-auth">
+    Create a session with better-auth's server API, then set its cookie iframe-safe.
+
+    ```ts
+    export const POST = launch(lti, async (result) => {
+      const id = ltiIdentity(result.claims)
+      const user = await upsertUserByLtiSub(id)
+      const { token } = await auth.api.createSession({ userId: user.id })
+      return sessionRedirect({
+        to: `${process.env.APP_URL}/home`,
+        cookies: [{ name: 'better-auth.session_token', value: token, maxAgeSec: 60 * 60 * 24 * 7 }],
+      })
+    })
+    ```
+  </TabItem>
+
   <TabItem label="Supabase Auth">
     Mint a magic link server-side and redirect through your confirm route to set SSR cookies. Key on the LTI
     `sub`; synthesize an email when the LMS omits one.
@@ -67,37 +101,6 @@ contextId?, contextTitle?, resourceLinkId? }`.
 
     Your `/auth/confirm` calls `supabase.auth.verifyOtp({ token_hash, type })` and sets the SSR cookies — ensure
     they're `SameSite=None; Secure`. Mirrors the battle-tested TeachSim `upsertLtiProfile` pattern.
-  </TabItem>
-
-  <TabItem label="NextAuth / Auth.js">
-    Either sign in via a Credentials provider with the verified `sub` (trusted — LTIkit already verified it), or
-    mint the Auth.js session JWT directly. Configure the session cookie for the iframe:
-
-    ```ts
-    // auth config
-    cookies: {
-      sessionToken: {
-        name: 'next-auth.session-token',
-        options: { httpOnly: true, sameSite: 'none', secure: true, path: '/' },
-      },
-    }
-    ```
-  </TabItem>
-
-  <TabItem label="better-auth">
-    Create a session with better-auth's server API, then set its cookie iframe-safe.
-
-    ```ts
-    export const POST = launch(lti, async (result) => {
-      const id = ltiIdentity(result.claims)
-      const user = await upsertUserByLtiSub(id)
-      const { token } = await auth.api.createSession({ userId: user.id })
-      return sessionRedirect({
-        to: `${process.env.APP_URL}/home`,
-        cookies: [{ name: 'better-auth.session_token', value: token, maxAgeSec: 60 * 60 * 24 * 7 }],
-      })
-    })
-    ```
   </TabItem>
 
   <TabItem label="Custom JWT">

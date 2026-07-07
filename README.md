@@ -23,9 +23,9 @@ storage adapter:
 
 | Your stack | Install |
 |---|---|
-| Next.js + Supabase (most common) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
-| Next.js + Redis (nonces) + Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-supabase` |
-| Next.js + Prisma/SQLite + NextAuth | `npm i @ltikit/core @ltikit/next @ltikit/adapter-prisma` |
+| Next.js + any DB via Prisma (SQLite, Postgres, MySQL — zero external service) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-prisma` |
+| Next.js + Supabase / Postgres | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
+| Next.js + Redis (nonces) + Prisma or Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-prisma` |
 | Hono / edge (Workers, Deno, Bun) + Redis + Supabase | `npm i @ltikit/core @ltikit/hono @ltikit/adapter-redis @ltikit/adapter-supabase` |
 | Hand-rolled framework, your own storage | `npm i @ltikit/core` |
 | Local dev / tests only | `npm i -D @ltikit/core @ltikit/adapter-memory` |
@@ -47,12 +47,12 @@ See [How it fits together](https://alasim.github.io/ltikit/getting-started/how-i
 ## Quick look
 
 ```ts
-import { createLti, staticKeyStore } from '@ltikit/core'
-import { supabasePlatformStore, supabaseNonceStore } from '@ltikit/adapter-supabase'
+import { createLti, staticKeyStore, ltiIdentity } from '@ltikit/core'
+import { prismaPlatformStore, prismaNonceStore } from '@ltikit/adapter-prisma'
 import { launch, sessionRedirect } from '@ltikit/next'
-import { ltiIdentity } from '@ltikit/core'
 
-export const lti = createLti({ keys, platforms: supabasePlatformStore(db), nonces: supabaseNonceStore(db) })
+// swap in Redis / Supabase / memory — same interface
+export const lti = createLti({ keys, platforms: prismaPlatformStore(db), nonces: prismaNonceStore(db) })
 
 // app/api/lti/launch/route.ts
 export const POST = launch(lti, async (result) => {
@@ -63,6 +63,17 @@ export const POST = launch(lti, async (result) => {
 ```
 
 **Docs:** guides, API reference, and the "how it fits together" map live in [`docs/`](./docs) (Astro Starlight).
+
+## Examples
+
+Two complete, runnable reference tools — each does the full loop (SSO → deep linking → grade passback → roster) against a real LMS:
+
+| Example | Stack | Highlights |
+|---|---|---|
+| [`examples/next-prisma-demo`](./examples/next-prisma-demo) | Next.js + Prisma/SQLite + NextAuth | **Zero external service** — clone & launch. Full parity + Dynamic Registration, cookieless Platform Storage, seeded login page. |
+| [`examples/next-demo`](./examples/next-demo) | Next.js + Supabase | Minimal loop; ships a bundled local Supabase (Docker) or point it at your own. |
+
+New to LTIkit? Start with **next-prisma-demo** — SQLite means no Docker or Supabase account. See the [Examples guide](https://alasim.github.io/ltikit/examples/) for ~2-minute run steps.
 
 ## Develop
 

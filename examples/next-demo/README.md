@@ -3,9 +3,8 @@
 A minimal LTI 1.3 tool built on `@ltikit/core` + `@ltikit/next` + `@ltikit/adapter-supabase`.
 It does the full loop: **SSO launch → deep-link content selection → grade passback**.
 
-> This app is **not a workspace member** by default (its `next`/`react`/`supabase`
-> deps are heavy). To run it, re-enable `examples/*` in the repo root
-> `pnpm-workspace.yaml`, then `pnpm install`.
+> This app is part of the pnpm workspace (`examples/*`) — from the repo root, `pnpm install`
+> installs its deps along with everything else.
 
 ## What each endpoint is
 

@@ -1,0 +1,86 @@
+---
+title: Prisma adapter
+description: PlatformStore + NonceStore on Prisma — any Prisma-supported database.
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+<Aside type="tip">
+Optional — one storage option, not a requirement. See [Storage adapters](../storage/) for the alternatives
+(Redis, Supabase, memory, or your own). This page is the full Prisma setup.
+</Aside>
+
+`@ltikit/adapter-prisma` provides **both** stores — `PlatformStore` (registered LMSs) and `NonceStore`
+(OIDC handshake state) — against **any Prisma-supported database** (SQLite, Postgres, MySQL, …). Bring
+your own Prisma schema; this adds two small models and maps them onto the core stores.
+
+```bash
+npm i @ltikit/core @ltikit/adapter-prisma
+```
+
+## 1. Add the models
+
+Copy these two models into **your own** `schema.prisma`, then migrate. `data` is a plain `String`
+(JSON-serialized by the adapter) rather than `Json` — SQLite has no native `Json` type, so this stays
+portable across every connector.
+
+```prisma
+model LtiPlatform {
+  id            String   @id @default(cuid())
+  issuer        String
+  clientId      String
+  authEndpoint  String
+  tokenEndpoint String
+  keysetUrl     String
+  deploymentId  String?
+  createdAt     DateTime @default(now())
+
+  @@unique([issuer, clientId])
+}
+
+model LtiNonce {
+  state      String   @id
+  nonce      String
+  platformId String
+  data       String?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([expiresAt])
+}
+```
+
+```bash
+npx prisma migrate dev --name add_ltikit
+```
+
+## 2. Wire the stores
+
+```ts
+import { PrismaClient } from '@prisma/client'
+import { createLti, staticKeyStore } from '@ltikit/core'
+import { prismaPlatformStore, prismaNonceStore } from '@ltikit/adapter-prisma'
+
+const prisma = new PrismaClient()
+
+export const lti = createLti({
+  keys: staticKeyStore({ /* ...your tool keypair... */ }),
+  platforms: prismaPlatformStore(prisma),
+  nonces: prismaNonceStore(prisma),
+})
+```
+
+No hard dependency on `@prisma/client`: the client is accepted structurally (`PrismaLike` — just the
+`ltiPlatform` / `ltiNonce` delegates), so any generated `PrismaClient` whose schema matches the two
+models above satisfies it automatically.
+
+## Notes
+
+- **Single-use nonces** are enforced by Prisma's per-row atomic `delete` — a replayed `state` hits a
+  missing row (Prisma's `P2025`), which `consume` turns into `null`.
+- Also implements the writable `MutablePlatformStore` contract, so **Dynamic Registration**
+  auto-persists new platforms with no manual insert.
+- Different model names? Pass an object matching `PrismaLike` that aliases your own delegates:
+  `prismaPlatformStore({ ltiPlatform: prisma.myModel, ltiNonce: prisma.myOtherModel })`.
+- A full working example (Next.js + Prisma/SQLite + NextAuth) lives in
+  [`examples/next-prisma-demo`](https://github.com/alasim/ltikit/tree/main/examples/next-prisma-demo).

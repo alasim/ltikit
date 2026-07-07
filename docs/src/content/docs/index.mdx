@@ -5,12 +5,15 @@ template: splash
 hero:
   tagline: LTI 1.3 (LTI Advantage) for serverless and edge. Just jose + fetch, bring your own database.
   image:
-    file: ../../assets/ltikit-mark.png
-    alt: LTIkit
+    file: ../../assets/ltikit-benner-logo-center-only.png
+    alt: LTIkit — runtime-, storage-, and framework-agnostic LTI 1.3 toolkit
   actions:
     - text: Quickstart
       link: getting-started/quickstart/
       icon: right-arrow
+    - text: See a runnable demo
+      link: examples/
+      variant: secondary
     - text: How it fits together
       link: getting-started/how-it-fits/
       variant: minimal
@@ -23,10 +26,10 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components'
     Pure `jose` + `fetch` — no Express, no MongoDB. Runs on Node, edge, Cloudflare Workers, Deno, Bun.
   </Card>
   <Card title="Bring your own storage" icon="setting">
-    Nonces, platform registry, and keys sit behind small adapter interfaces. Supabase, Redis, memory — or your own.
+    Nonces, platform registry, and keys sit behind small adapter interfaces. Prisma (any DB), Redis, Supabase, memory — or your own.
   </Card>
   <Card title="Auth-agnostic" icon="approve-check">
-    LTIkit hands you verified claims. Create your session with Supabase Auth, NextAuth, better-auth, or a custom JWT.
+    LTIkit hands you verified claims. Create your session with NextAuth, better-auth, Supabase Auth, or a custom JWT.
   </Card>
   <Card title="Field-hardened" icon="warning">
     The cross-LMS gotchas (Canvas + Moodle) are baked in — grade passback, deep linking, and SSO that actually work.
@@ -38,9 +41,19 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components'
 A small required core, and the rest is your choice. Pick each independently:
 
 <CardGrid>
-  <LinkCard title="Storage adapters" href="guides/storage/" description="Supabase, Redis, memory, or your own." />
+  <LinkCard title="Storage adapters" href="guides/storage/" description="Prisma (any DB), Redis, Supabase, memory, or your own." />
   <LinkCard title="Framework bindings" href="guides/frameworks/" description="Next.js, Hono, or plain Web Request/Response." />
-  <LinkCard title="Auth integration" href="guides/auth-integration/" description="Supabase Auth, NextAuth, better-auth, or custom JWT." />
+  <LinkCard title="Auth integration" href="guides/auth-integration/" description="NextAuth, better-auth, Supabase Auth, or custom JWT." />
+</CardGrid>
+
+## See it working
+
+Prefer to run something first? Two complete reference tools do the full loop — SSO → deep
+linking → grades → roster — against a real LMS.
+
+<CardGrid>
+  <LinkCard title="next-prisma-demo (zero setup)" href="examples/" description="Next.js + Prisma/SQLite + NextAuth. No external service — clone and launch." />
+  <LinkCard title="All examples" href="examples/" description="Compare both demos and copy the ~2-minute run steps." />
 </CardGrid>
 
 New to how the pieces relate? Start with [How it fits together](getting-started/how-it-fits/).

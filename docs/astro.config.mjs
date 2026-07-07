@@ -20,9 +20,12 @@ export default defineConfig({
       title: 'LTIkit',
       description:
         'Runtime-, storage-, and framework-agnostic LTI 1.3 (LTI Advantage) toolkit — jose + fetch, bring your own DB.',
-      // The square mark works on both themes; the title text ("LTIkit") renders beside it.
-      logo: { src: './src/assets/ltikit-mark.png', alt: 'LTIkit' },
-      favicon: '/favicon.png',
+      // Full wordmark logo (mark + "LTIkit"); replacesTitle hides the duplicate site-title text.
+      // NOTE: the "kit" glyph is charcoal — low contrast on the dark theme. Swap to a light/dark
+      // pair here once a dark-mode logo (light "kit") is exported.
+      logo: { src: './src/assets/ltikit-logo.png', alt: 'LTIkit', replacesTitle: true },
+      favicon: '/favicon.ico',
+      customCss: ['./src/styles/custom.css'],
       head: [
         { tag: 'meta', attrs: { property: 'og:image', content: `${SITE}${BASE}/og.png` } },
         { tag: 'meta', attrs: { name: 'twitter:image', content: `${SITE}${BASE}/og.png` } },
@@ -38,10 +41,10 @@ export default defineConfig({
             '../packages/core/src/index.ts',
             '../packages/next/src/index.ts',
             '../packages/hono/src/index.ts',
-            '../packages/adapter-supabase/src/index.ts',
             '../packages/adapter-memory/src/index.ts',
-            '../packages/adapter-redis/src/index.ts',
             '../packages/adapter-prisma/src/index.ts',
+            '../packages/adapter-redis/src/index.ts',
+            '../packages/adapter-supabase/src/index.ts',
           ],
           tsconfig: '../tsconfig.base.json',
           typeDoc: { skipErrorChecking: true },
@@ -54,6 +57,7 @@ export default defineConfig({
             { label: 'Introduction', slug: 'introduction' },
             { label: 'How it fits together', slug: 'getting-started/how-it-fits' },
             { label: 'Quickstart', slug: 'getting-started/quickstart' },
+            { label: 'Examples (runnable demos)', slug: 'examples' },
             { label: 'Concepts', slug: 'getting-started/concepts' },
           ],
         },
@@ -71,12 +75,21 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Your stack (pick one each)',
+          label: 'Your stack (pick each)',
           items: [
             { label: 'Storage adapters', slug: 'guides/storage' },
             { label: 'Framework bindings', slug: 'guides/frameworks' },
             { label: 'Auth integration', slug: 'guides/auth-integration' },
-            { label: 'Supabase adapter (setup)', slug: 'guides/supabase-adapter' },
+          ],
+        },
+        {
+          // Per-adapter setup detail — kept symmetric so no single store looks like "the" default.
+          label: 'Adapter setup',
+          collapsed: true,
+          items: [
+            { label: 'Prisma (any DB)', slug: 'guides/prisma-adapter' },
+            { label: 'Redis / Upstash', slug: 'guides/redis-adapter' },
+            { label: 'Supabase / Postgres', slug: 'guides/supabase-adapter' },
           ],
         },
         // Auto-generated API reference group.
