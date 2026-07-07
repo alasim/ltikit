@@ -1,0 +1,33 @@
+// LTIkit — Prisma schema snippet for @ltikit/adapter-prisma.
+//
+// Copy these two models into YOUR OWN schema.prisma (don't `prisma db pull` this
+// file directly — it has no datasource block). Field names/types below are the
+// exact contract `prismaPlatformStore` / `prismaNonceStore` expect.
+//
+// Works with any Prisma-supported datasource (SQLite, Postgres, MySQL, ...).
+// `data` is a plain String (JSON-serialized by the adapter) rather than `Json` —
+// SQLite has no native Json type, so this stays portable across every connector.
+
+model LtiPlatform {
+  id            String  @id @default(cuid())
+  issuer        String
+  clientId      String
+  authEndpoint  String
+  tokenEndpoint String
+  keysetUrl     String
+  deploymentId  String?
+  createdAt     DateTime @default(now())
+
+  @@unique([issuer, clientId])
+}
+
+model LtiNonce {
+  state       String   @id
+  nonce       String
+  platformId  String
+  data        String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([expiresAt])
+}

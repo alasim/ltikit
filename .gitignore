@@ -11,3 +11,10 @@ coverage
 .next
 next-env.d.ts
 *.tsbuildinfo
+
+# SQLite (examples/next-prisma-demo)
+*.db
+*.db-journal
+
+# Prisma 7 custom generator output (examples/next-prisma-demo)
+/examples/next-prisma-demo/generated

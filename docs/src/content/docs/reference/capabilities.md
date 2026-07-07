@@ -51,7 +51,8 @@ The per-feature status grid. For milestones and the path ahead, see the [Roadmap
 | `@ltikit/adapter-supabase` (Postgres) | ✅ | `PlatformStore` + `NonceStore` |
 | `@ltikit/adapter-redis` (Redis / Upstash) | ◑ | `NonceStore` ✅; `PlatformStore` → 🔲 |
 | `@ltikit/adapter-memory` (dev/tests) | ✅ | `PlatformStore` + `NonceStore` |
-| Prisma / Drizzle / DynamoDB / Mongo adapters | 🔲 | v1.x |
+| `@ltikit/adapter-prisma` (any Prisma DB) | ✅ | `PlatformStore` + `NonceStore`; SQLite/Postgres/MySQL |
+| Drizzle / DynamoDB / Mongo adapters | 🔲 | v1.x |
 
 ## Advanced services (future)
 

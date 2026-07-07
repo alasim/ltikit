@@ -50,7 +50,8 @@ The full launch loop plus the LTI Advantage services, verified live against **Ca
   in inside the LMS iframe when third-party cookies are blocked (Safari ITP, Firefox TCP).
 - **Identity seam** — `ltiIdentity()` + role helpers; you own session creation (auth-agnostic).
 - **Adapters** — `@ltikit/adapter-memory`, `@ltikit/adapter-redis` (nonce), `@ltikit/adapter-supabase`
-  (platform + nonce). **Bindings** — `@ltikit/next`, `@ltikit/hono`.
+  (platform + nonce), `@ltikit/adapter-prisma` (platform + nonce; any Prisma DB). **Bindings** —
+  `@ltikit/next`, `@ltikit/hono`.
 
 ## 🎯 v1.0 GA — parity + certification
 
@@ -74,7 +75,7 @@ Close the gaps real cross-LMS use and certification need, then certify.
   alongside the shipped `frameResize` + Platform Storage.
 - **More bindings** — Express, SvelteKit, Remix (edge / Cloudflare Workers / Deno / Bun already work
   through the web-standard core).
-- **More adapters** — Prisma, Drizzle, DynamoDB, Mongo; a Redis `PlatformStore`.
+- **More adapters** — Drizzle, DynamoDB, Mongo; a Redis `PlatformStore`. (Prisma ✅ shipped.)
 
 ## 🌍 v2.x — advanced Advantage services
 

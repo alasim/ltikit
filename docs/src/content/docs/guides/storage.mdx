@@ -49,6 +49,25 @@ Pick the backing store below. (See [How it fits together](../../getting-started/
     Also ships `fromIoRedis` and `fromNodeRedis`.
   </TabItem>
 
+  <TabItem label="Prisma">
+    Prisma, against any Prisma-supported database (SQLite, Postgres, MySQL, ...). Copy the two models
+    from the package's `prisma/schema.example.prisma` into your own schema, then:
+
+    ```ts
+    import { PrismaClient } from '@prisma/client'
+    import { prismaPlatformStore, prismaNonceStore } from '@ltikit/adapter-prisma'
+
+    const prisma = new PrismaClient()
+
+    // in createLti({ ... }):
+    platforms: prismaPlatformStore(prisma),
+    nonces: prismaNonceStore(prisma),
+    ```
+
+    No hard dependency on `@prisma/client` — the client is accepted structurally, so any generated
+    `PrismaClient` matching the two models works. See the [Prisma adapter](https://www.npmjs.com/package/@ltikit/adapter-prisma) package.
+  </TabItem>
+
   <TabItem label="Memory">
     In-memory — **dev and tests only** (state is per-process; can't enforce single-use across serverless
     invocations).

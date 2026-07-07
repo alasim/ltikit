@@ -41,6 +41,7 @@ export default defineConfig({
             '../packages/adapter-supabase/src/index.ts',
             '../packages/adapter-memory/src/index.ts',
             '../packages/adapter-redis/src/index.ts',
+            '../packages/adapter-prisma/src/index.ts',
           ],
           tsconfig: '../tsconfig.base.json',
           typeDoc: { skipErrorChecking: true },

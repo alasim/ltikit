@@ -1,0 +1,67 @@
+// Prisma schema for the ltikit Next.js + Prisma/SQLite + NextAuth demo.
+//
+// Two groups of models:
+//   - LtiPlatform / LtiNonce — from @ltikit/adapter-prisma's schema.example.prisma.
+//   - User / LtiEnrollment  — this app's own auth. NextAuth uses the `jwt` session
+//     strategy with a custom jose-based encode/decode (see lib/auth.ts), so no
+//     NextAuth Account/Session/VerificationToken tables are needed.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// --- App auth ---
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String? // set for the seeded demo user; null for LTI-only users
+  name         String?
+  createdAt    DateTime @default(now())
+
+  enrollments LtiEnrollment[]
+}
+
+/// Links a real app User to one LMS identity (`sub` is only unique per issuer).
+model LtiEnrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  issuer    String
+  ltiSub    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([issuer, ltiSub])
+}
+
+// --- LTI storage (@ltikit/adapter-prisma contract) ---
+
+model LtiPlatform {
+  id            String   @id @default(cuid())
+  issuer        String
+  clientId      String
+  authEndpoint  String
+  tokenEndpoint String
+  keysetUrl     String
+  deploymentId  String?
+  createdAt     DateTime @default(now())
+
+  @@unique([issuer, clientId])
+}
+
+model LtiNonce {
+  state      String   @id
+  nonce      String
+  platformId String
+  data       String? // JSON-serialized by @ltikit/adapter-prisma (SQLite has no native Json type)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([expiresAt])
+}

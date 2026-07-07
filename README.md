@@ -25,6 +25,7 @@ storage adapter:
 |---|---|
 | Next.js + Supabase (most common) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-supabase` |
 | Next.js + Redis (nonces) + Supabase (platforms) | `npm i @ltikit/core @ltikit/next @ltikit/adapter-redis @ltikit/adapter-supabase` |
+| Next.js + Prisma/SQLite + NextAuth | `npm i @ltikit/core @ltikit/next @ltikit/adapter-prisma` |
 | Hono / edge (Workers, Deno, Bun) + Redis + Supabase | `npm i @ltikit/core @ltikit/hono @ltikit/adapter-redis @ltikit/adapter-supabase` |
 | Hand-rolled framework, your own storage | `npm i @ltikit/core` |
 | Local dev / tests only | `npm i -D @ltikit/core @ltikit/adapter-memory` |
@@ -40,6 +41,7 @@ See [How it fits together](https://alasim.github.io/ltikit/getting-started/how-i
 | [`@ltikit/hono`](https://www.npmjs.com/package/@ltikit/hono) | Hono route bindings. |
 | [`@ltikit/adapter-supabase`](https://www.npmjs.com/package/@ltikit/adapter-supabase) | `PlatformStore` + `NonceStore` on Supabase/Postgres. |
 | [`@ltikit/adapter-redis`](https://www.npmjs.com/package/@ltikit/adapter-redis) | `NonceStore` on Redis / Upstash (serverless-friendly). |
+| [`@ltikit/adapter-prisma`](https://www.npmjs.com/package/@ltikit/adapter-prisma) | `PlatformStore` + `NonceStore` on Prisma — any Prisma-supported DB (SQLite, Postgres, MySQL). |
 | [`@ltikit/adapter-memory`](https://www.npmjs.com/package/@ltikit/adapter-memory) | In-memory stores for dev/tests. |
 
 ## Quick look

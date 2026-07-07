@@ -1,0 +1,40 @@
+{
+  "name": "@ltikit/adapter-prisma",
+  "version": "0.1.0",
+  "description": "Prisma PlatformStore + NonceStore adapters for ltikit — any Prisma-supported database.",
+  "license": "MIT",
+  "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",
+  "homepage": "https://alasim.github.io/ltikit/guides/storage/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alasim/ltikit.git",
+    "directory": "packages/adapter-prisma"
+  },
+  "bugs": "https://github.com/alasim/ltikit/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ltikit/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
