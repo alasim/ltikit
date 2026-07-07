@@ -37,6 +37,43 @@ await lti.ags.publishScore({
 Lower-level pieces are also available: `lti.ags.getToken`, `lti.ags.score.submit`,
 `lti.ags.lineItems.{list,create,get}`, `lti.ags.result.list`.
 
+## Canvas: attach a review link (SpeedGrader)
+
+Canvas has a vendor-only AGS extension that turns a posted score into a clickable submission in
+SpeedGrader's central pane — useful for "faculty review the student's work without leaving Canvas."
+Pass `canvasSubmission` alongside the score:
+
+```ts
+await lti.ags.publishScore({
+  platform, lineItemUrl, userId,
+  scoreGiven: 2, scoreMaximum: 2,
+  canvasSubmission: {
+    type: 'basic_lti_launch',       // opens `url` as an LTI launch inside SpeedGrader; or 'online_url'
+    url: reviewUrl,                 // your own route — see capability links below
+  },
+})
+```
+
+Ignored by non-Canvas platforms — safe to always pass it if you only care about Canvas. Not part of
+the IMS AGS spec; see [Canvas's Score extension docs](https://canvas.instructure.com/doc/api/score.html).
+
+**Building `reviewUrl` without a real session:** SpeedGrader opens that link with no logged-in
+faculty user. `signCapabilityLink(keys, payload)` / `verifyCapabilityLink(keys, token)` mint and
+verify a short-lived token using the tool's own keypair — no LMS round-trip, no DB row, self-issued
+and self-verified:
+
+```ts
+// at grade-passback time
+const token = await signCapabilityLink(keys, { sessionId }, { expiresIn: '30d' })
+const reviewUrl = `${APP_URL}/lti/report/${sessionId}?t=${token}`
+
+// in the review route
+const { sessionId } = await verifyCapabilityLink<{ sessionId: string }>(keys, token)
+```
+
+Keep the expiry short-lived relative to how long the link needs to stay valid — it's a bearer token,
+anyone with the URL can open it.
+
 ## Baked-in gotchas
 
 LTIkit encodes the cross-LMS AGS pitfalls so you don't rediscover them:

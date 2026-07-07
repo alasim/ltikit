@@ -1,5 +1,11 @@
 # @ltikit/core
 
+## 1.0.0-rc.2
+
+### Minor Changes
+
+- e6c214b: Add `signCapabilityLink`/`verifyCapabilityLink` — a self-issued, self-verified short-lived token using the tool's own keypair, for no-login privileged links (e.g. a faculty review link opened from Canvas SpeedGrader). Add `canvasSubmission` to `publishScore`/`postScore` — the Canvas-only AGS score extension (`https://canvas.instructure.com/lti/submission`) that attaches a clickable review link to a posted grade.
+
 ## 1.0.0-rc.1
 
 ### Patch Changes

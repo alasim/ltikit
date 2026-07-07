@@ -11,9 +11,11 @@
     "@ltikit/hono": "0.0.0",
     "@ltikit/next": "0.0.0",
     "@ltikit/example-next-prisma-demo": "0.0.1-rc.0",
-    "@ltikit/adapter-prisma": "0.1.0"
+    "@ltikit/adapter-prisma": "0.1.0",
+    "@ltikit/example-memory-demo": "0.0.1-rc.0"
   },
   "changesets": [
+    "capability-links-canvas-submission",
     "freeze-1-0-rc",
     "npm-metadata-readmes"
   ]

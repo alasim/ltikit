@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/example-memory-demo",
-  "version": "0.0.1-rc.0",
+  "version": "0.0.1-rc.1",
   "private": true,
   "description": "Zero-setup reference LTI 1.3 tool built on ltikit (Next.js App Router + in-memory adapter). No database, no external service.",
   "type": "module",

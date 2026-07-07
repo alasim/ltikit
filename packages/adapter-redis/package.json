@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/adapter-redis",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "description": "Redis / Upstash NonceStore adapter for ltikit.",
   "license": "MIT",
   "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",

@@ -25,7 +25,8 @@ The per-feature status grid. For milestones and the path ahead, see the [Roadmap
 | Deep Linking — content types | ◑ | `ltiResourceLink` only (with `lineItem` for graded content); `link` / `html` / `file` / `image` + `iframe`/`window` presentation → 🔜 |
 | AGS — line items | ◑ | list / create / get ✅; update / delete → 🔜 |
 | AGS — scores (grade passback) | ✅ | `publishScore`, `FullyGraded`, cross-LMS gotchas baked in |
-| AGS — score `submission` object | 🔜 | For submission timestamps / review |
+| AGS — score `submission` object (IMS timestamps) | 🔜 | `submittedAt`/`startedAt` — not yet exposed |
+| AGS — Canvas `submission` extension (SpeedGrader review link) | ✅ | `canvasSubmission` on `publishScore`; Canvas-only vendor extension, not IMS spec |
 | AGS — results | ✅ | `result.list` |
 | NRPS (names & roles / roster) | ◑ | context-level `getMembers` + `Link rel=next` pagination + `role`/`limit` ✅; resource-link `rlid` + `differences` → 🔜 |
 | Submission Review (`LtiSubmissionReviewRequest`) | 🔲 | Faculty review a submission from the LMS (v1.x) |
@@ -38,6 +39,7 @@ The per-feature status grid. For milestones and the path ahead, see the [Roadmap
 | LTI Platform Storage (cookieless launches) | ✅ | `@ltikit/next/client` postMessage; survives 3p-cookie blocking |
 | iframe `postMessage` — `frameResize` | ✅ | `frameResizeScript` |
 | iframe `postMessage` — `get_page_content` / `scrollToTop` / `showAlert` | 🔲 | v1.x |
+| Capability links (self-issued, no-login privileged links) | ✅ | `signCapabilityLink` / `verifyCapabilityLink` — short-lived token via the tool's own keypair |
 | Access-token caching (`TokenCache` adapter) | 🔲 | Optional, off by default; for bulk AGS/NRPS (v1.x) |
 | 1EdTech LTI Advantage certification | 🔜 | Credibility milestone → tags 1.0 GA |
 
