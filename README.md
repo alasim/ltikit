@@ -10,6 +10,63 @@ Runs on serverless and edge (Next.js, Hono, Cloudflare Workers, Lambda) — no E
 
 > **Status (1.0-rc):** the full launch loop + LTI Advantage services (deep linking, AGS, NRPS), **Dynamic Registration**, and **cookieless launches (Platform Storage)** — live-verified against Canvas + MoodleCloud, with an auth-agnostic session seam. See the [**Roadmap**](https://alasim.github.io/ltikit/roadmap/) and [Capabilities](https://alasim.github.io/ltikit/reference/capabilities/) for the path to a complete LTI 1.3 toolkit (internal build process: [`ROADMAP.md`](./ROADMAP.md), design: [`DESIGN.md`](./DESIGN.md)).
 
+## Quickstart
+
+No database, no LMS account needed to see it run — this uses the in-memory adapter.
+
+```bash
+npm i @ltikit/core @ltikit/next @ltikit/adapter-memory
+```
+
+```ts
+// lib/lti.ts — swap MemoryPlatformStore/MemoryNonceStore for Redis/Prisma/Supabase later, same interface
+import { createLti, staticKeyStore } from '@ltikit/core'
+import { MemoryNonceStore, MemoryPlatformStore } from '@ltikit/adapter-memory'
+
+export const lti = createLti({
+  keys: staticKeyStore({ privateKeyPem, kid: 'key-1', publicJwk }), // generate: see docs
+  platforms: new MemoryPlatformStore([/* your test LMS platform */]),
+  nonces: new MemoryNonceStore(),
+})
+```
+
+```ts
+// app/api/lti/login/route.ts — OIDC third-party initiation
+import { oidcLogin } from '@ltikit/next'
+import { lti } from '@/lib/lti'
+export const POST = oidcLogin(lti, { redirectUri: `${process.env.APP_URL}/api/lti/launch` })
+```
+
+```ts
+// app/api/lti/launch/route.ts — verified launch → your session
+import { launch, sessionRedirect, ltiIdentity } from '@ltikit/next'
+import { lti } from '@/lib/lti'
+export const POST = launch(lti, async (result) => {
+  const id = ltiIdentity(result.claims)   // sub, email?, roles, isInstructor…
+  return sessionRedirect({ to: '/home', cookies: [/* your session cookie */] })
+})
+```
+
+```ts
+// app/.well-known/jwks.json/route.ts — the tool's public keyset
+import { jwks } from '@ltikit/next'
+import { lti } from '@/lib/lti'
+export const GET = jwks(lti)
+```
+
+That's a working tool. Full [Quickstart](https://alasim.github.io/ltikit/getting-started/quickstart/) covers the keypair + LMS registration steps.
+
+## Examples
+
+Prefer to run something end-to-end first? Two complete reference tools do the full loop (SSO → deep linking → grade passback → roster) against a real LMS:
+
+| Example | Stack | Highlights |
+|---|---|---|
+| [`examples/next-prisma-demo`](./examples/next-prisma-demo) | Next.js + Prisma/SQLite + NextAuth | **Zero external service** — clone & launch. Full parity + Dynamic Registration, cookieless Platform Storage, seeded login page. |
+| [`examples/next-demo`](./examples/next-demo) | Next.js + Supabase | Minimal loop; ships a bundled local Supabase (Docker) or point it at your own. |
+
+New to LTIkit? Start with **next-prisma-demo** — SQLite means no Docker or Supabase account. See the [Examples guide](https://alasim.github.io/ltikit/examples/) for ~2-minute run steps.
+
 ## Why
 
 `ltijs` assumes Express + MongoDB + in-process state. LTIkit is the opposite: a **stateless core** (only `jose` + `fetch`) with all state behind small adapter interfaces, plus thin per-framework bindings. It runs anywhere JS runs, including the edge.
@@ -18,8 +75,7 @@ A small **required core** + **swappable slots** (storage, framework binding, aut
 
 ## Which packages do I need?
 
-Always start with `@ltikit/core`, then add **one** framework binding and **one** (or mixed)
-storage adapter:
+For production, swap the memory adapter above for a real store — add **one** framework binding and **one** (or mixed) storage adapter:
 
 | Your stack | Install |
 |---|---|
@@ -39,41 +95,12 @@ See [How it fits together](https://alasim.github.io/ltikit/getting-started/how-i
 | [`@ltikit/core`](https://www.npmjs.com/package/@ltikit/core) | LTI 1.3 logic: JWT verify/sign, OIDC login, launch, AGS, NRPS, deep linking, dynamic registration, identity. jose only. |
 | [`@ltikit/next`](https://www.npmjs.com/package/@ltikit/next) | Next.js App Router bindings (Web `Request`/`Response`) + iframe helpers + cookieless Platform Storage (`/client`). |
 | [`@ltikit/hono`](https://www.npmjs.com/package/@ltikit/hono) | Hono route bindings. |
+| [`@ltikit/adapter-prisma`](https://www.npmjs.com/package/@ltikit/adapter-prisma) | `PlatformStore` + `NonceStore` on Prisma — any Prisma-supported DB (SQLite, Postgres, MySQL). |
 | [`@ltikit/adapter-supabase`](https://www.npmjs.com/package/@ltikit/adapter-supabase) | `PlatformStore` + `NonceStore` on Supabase/Postgres. |
 | [`@ltikit/adapter-redis`](https://www.npmjs.com/package/@ltikit/adapter-redis) | `NonceStore` on Redis / Upstash (serverless-friendly). |
-| [`@ltikit/adapter-prisma`](https://www.npmjs.com/package/@ltikit/adapter-prisma) | `PlatformStore` + `NonceStore` on Prisma — any Prisma-supported DB (SQLite, Postgres, MySQL). |
 | [`@ltikit/adapter-memory`](https://www.npmjs.com/package/@ltikit/adapter-memory) | In-memory stores for dev/tests. |
 
-## Quick look
-
-```ts
-import { createLti, staticKeyStore, ltiIdentity } from '@ltikit/core'
-import { prismaPlatformStore, prismaNonceStore } from '@ltikit/adapter-prisma'
-import { launch, sessionRedirect } from '@ltikit/next'
-
-// swap in Redis / Supabase / memory — same interface
-export const lti = createLti({ keys, platforms: prismaPlatformStore(db), nonces: prismaNonceStore(db) })
-
-// app/api/lti/launch/route.ts
-export const POST = launch(lti, async (result) => {
-  const id = ltiIdentity(result.claims)   // sub, email?, roles, isInstructor…
-  // create your user + session with your auth lib, then:
-  return sessionRedirect({ to: '/home', cookies: [/* your session cookie */] })
-})
-```
-
 **Docs:** guides, API reference, and the "how it fits together" map live in [`docs/`](./docs) (Astro Starlight).
-
-## Examples
-
-Two complete, runnable reference tools — each does the full loop (SSO → deep linking → grade passback → roster) against a real LMS:
-
-| Example | Stack | Highlights |
-|---|---|---|
-| [`examples/next-prisma-demo`](./examples/next-prisma-demo) | Next.js + Prisma/SQLite + NextAuth | **Zero external service** — clone & launch. Full parity + Dynamic Registration, cookieless Platform Storage, seeded login page. |
-| [`examples/next-demo`](./examples/next-demo) | Next.js + Supabase | Minimal loop; ships a bundled local Supabase (Docker) or point it at your own. |
-
-New to LTIkit? Start with **next-prisma-demo** — SQLite means no Docker or Supabase account. See the [Examples guide](https://alasim.github.io/ltikit/examples/) for ~2-minute run steps.
 
 ## Develop
 
