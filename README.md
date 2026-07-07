@@ -54,18 +54,19 @@ import { lti } from '@/lib/lti'
 export const GET = jwks(lti)
 ```
 
-That's a working tool. Full [Quickstart](https://alasim.github.io/ltikit/getting-started/quickstart/) covers the keypair + LMS registration steps.
+That's a working tool. This exact code is runnable as [`examples/memory-demo`](./examples/memory-demo) — clone the repo and it's a real LTI tool in under a minute. Full [Quickstart](https://alasim.github.io/ltikit/getting-started/quickstart/) covers the keypair + LMS registration steps.
 
 ## Examples
 
-Prefer to run something end-to-end first? Two complete reference tools do the full loop (SSO → deep linking → grade passback → roster) against a real LMS:
+Prefer to run something end-to-end first? Three complete reference tools do the full loop (SSO → deep linking → grade passback → roster) against a real LMS:
 
 | Example | Stack | Highlights |
 |---|---|---|
-| [`examples/next-prisma-demo`](./examples/next-prisma-demo) | Next.js + Prisma/SQLite + NextAuth | **Zero external service** — clone & launch. Full parity + Dynamic Registration, cookieless Platform Storage, seeded login page. |
+| [`examples/memory-demo`](./examples/memory-demo) | Next.js + in-memory adapter | **Fastest** — no database, no Docker, nothing external. State resets on server restart. |
+| [`examples/next-prisma-demo`](./examples/next-prisma-demo) | Next.js + Prisma/SQLite + NextAuth | **Zero external service, persistent.** Full parity + Dynamic Registration, cookieless Platform Storage, seeded login page. |
 | [`examples/next-demo`](./examples/next-demo) | Next.js + Supabase | Minimal loop; ships a bundled local Supabase (Docker) or point it at your own. |
 
-New to LTIkit? Start with **next-prisma-demo** — SQLite means no Docker or Supabase account. See the [Examples guide](https://alasim.github.io/ltikit/examples/) for ~2-minute run steps.
+New to LTIkit? Start with **memory-demo** — it's the Quickstart above, runnable. See the [Examples guide](https://alasim.github.io/ltikit/examples/) for run steps on all three.
 
 ## Why
 

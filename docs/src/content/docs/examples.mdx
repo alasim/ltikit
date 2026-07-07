@@ -5,20 +5,28 @@ description: Runnable, end-to-end LTI 1.3 tools built with LTIkit — clone one 
 
 import { Card, CardGrid, LinkCard, Aside } from '@astrojs/starlight/components'
 
-Two complete, runnable reference tools live in the repo. Each does the **full LTI loop** —
+Three complete, runnable reference tools live in the repo. Each does the **full LTI loop** —
 SSO launch → deep-link content selection → grade passback (AGS) → roster (NRPS) — so you can see
 LTIkit working against a real LMS before wiring your own app.
 
 <Aside type="tip">
-New here? Start with **next-prisma-demo** — SQLite means **zero external services** (no Docker, no
-Supabase account), so it's the fastest path from clone to a working launch.
+New here? Start with **memory-demo** — no database, no Docker, nothing to install beyond the repo
+itself. It's the exact code from the root [README Quickstart](https://github.com/alasim/ltikit#quickstart),
+runnable.
 </Aside>
 
 <CardGrid>
-  <Card title="next-prisma-demo — zero-setup" icon="rocket">
-    **Next.js + Prisma/SQLite + NextAuth.** Full parity: SSO, deep linking, AGS, NRPS, Dynamic
-    Registration, cookieless **Platform Storage**, plus a seeded login page for direct (non-LMS)
-    visits. No external service — the DB is a local SQLite file.
+  <Card title="memory-demo — fastest" icon="rocket">
+    **Next.js + in-memory adapter.** No database, no external service at all. Full LTI loop +
+    Dynamic Registration + cookieless **Platform Storage**. Trade-off: state resets on server
+    restart — re-register after each restart.
+
+    [Open on GitHub →](https://github.com/alasim/ltikit/tree/main/examples/memory-demo)
+  </Card>
+  <Card title="next-prisma-demo — persistent, zero-setup" icon="seti:db">
+    **Next.js + Prisma/SQLite + NextAuth.** Same zero-external-service simplicity, but state
+    survives restarts. Full parity: SSO, deep linking, AGS, NRPS, Dynamic Registration, cookieless
+    Platform Storage, plus a seeded login page for direct (non-LMS) visits.
 
     [Open on GitHub →](https://github.com/alasim/ltikit/tree/main/examples/next-prisma-demo)
   </Card>
@@ -31,37 +39,35 @@ Supabase account), so it's the fastest path from clone to a working launch.
   </Card>
 </CardGrid>
 
-## Run it in ~2 minutes (next-prisma-demo)
+## Run it in under a minute (memory-demo)
 
 ```bash
 git clone https://github.com/alasim/ltikit
 cd ltikit
 pnpm install
 
-cd examples/next-prisma-demo
-cp .env.example .env.local     # then fill APP_URL, AUTH_SECRET, and the keypair
-pnpm db:migrate                # SQLite → dev.db (Prisma + better-sqlite3)
-pnpm db:seed                   # demo login: demo@ltikit.dev / ltikit-demo
+cd examples/memory-demo
+cp .env.example .env.local     # then fill APP_URL and the keypair
 pnpm dev
 ```
 
-Visit `/` → prompted to `/login` (the seeded demo account). Launched from an LMS → skips login
-entirely; the launch handler mints the session. To register with an LMS, point its LTI 1.3
-auto-config at `APP_URL/api/lti/register` (Dynamic Registration) — no manual platform insert.
+Point your LMS's LTI 1.3 auto-config at `APP_URL/api/lti/register` (Dynamic Registration) — no
+manual setup, no seed data. Restarted the server since registering? The platform is gone
+(in-memory) — just re-run Dynamic Registration before your next launch.
 
 Need a public HTTPS URL for the LMS to reach the tool (its iframe + `SameSite=None; Secure`
 cookies require it) — a dev tunnel works for local testing.
 
 ## Which demo shows what
 
-| Capability | next-prisma-demo | next-demo |
-|---|---|---|
-| Storage | Prisma / SQLite (zero external service) | Supabase / Postgres |
-| Framework binding | `@ltikit/next` | `@ltikit/next` |
-| Auth / session | NextAuth v5 + seeded login page | app-owned session |
-| SSO launch · deep linking · AGS · NRPS | ✅ | ✅ |
-| Dynamic Registration | ✅ | — |
-| Cookieless Platform Storage | ✅ | — |
+| Capability | memory-demo | next-prisma-demo | next-demo |
+|---|---|---|---|
+| Storage | In-memory (zero setup, resets on restart) | Prisma / SQLite (zero external service, persistent) | Supabase / Postgres |
+| Framework binding | `@ltikit/next` | `@ltikit/next` | `@ltikit/next` |
+| Auth / session | app-owned session | NextAuth v5 + seeded login page | app-owned session |
+| SSO launch · deep linking · AGS · NRPS | ✅ | ✅ | ✅ |
+| Dynamic Registration | ✅ (only option) | ✅ | — |
+| Cookieless Platform Storage | ✅ | ✅ | — |
 
 ## Next steps
 
