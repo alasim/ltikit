@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/example-next-demo",
-  "version": "0.0.1-rc.3",
+  "version": "0.0.1-rc.4",
   "private": true,
   "description": "Reference LTI 1.3 tool built on ltikit (Next.js App Router + Supabase).",
   "type": "module",

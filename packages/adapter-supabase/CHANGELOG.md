@@ -1,5 +1,13 @@
 # @ltikit/adapter-supabase
 
+## 1.0.0-rc.4
+
+### Patch Changes
+
+- Republish (rc.4). The rc.3 `@ltikit/next` tarball on npm was corrupted by a double-publish — the registry metadata integrity did not match the served tarball, so installs failed with `ERR_PNPM_TARBALL_INTEGRITY`. No source changes; clean rebuild + republish to supersede the bad rc.3.
+- Updated dependencies
+  - @ltikit/core@1.0.0-rc.4
+
 ## 1.0.0-rc.3
 
 ### Minor Changes

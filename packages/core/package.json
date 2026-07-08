@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/core",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "description": "Runtime-agnostic LTI 1.3 (LTI Advantage) core — jose + fetch, no framework, no DB.",
   "license": "MIT",
   "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",
