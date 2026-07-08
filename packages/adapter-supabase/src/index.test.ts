@@ -182,6 +182,56 @@ describe('@ltikit/adapter-supabase mapping', () => {
     )
   })
 
+  it('maps a configured tenant column to Platform.tenantId on find', async () => {
+    const p: Platform = {
+      id: 'p1',
+      issuer: 'https://lms.example',
+      clientId: 'c1',
+      authEndpoint: 'https://lms.example/auth',
+      tokenEndpoint: 'https://lms.example/token',
+      keysetUrl: 'https://lms.example/jwks',
+      deploymentId: null,
+    }
+    const client = makeClient({
+      lti_platforms: [{ ...seedRow(p), organization_id: 'org-1' }],
+    })
+    const store = supabasePlatformStore(client, { tenantColumn: 'organization_id' })
+    expect((await store.find('https://lms.example', 'c1'))?.tenantId).toBe('org-1')
+  })
+
+  it('writes tenantId to the configured tenant column on save', async () => {
+    const client = makeClient()
+    const store = supabasePlatformStore(client, { tenantColumn: 'organization_id' })
+    const saved = await store.save({
+      issuer: 'https://lms.example',
+      clientId: 'c1',
+      authEndpoint: 'https://lms.example/auth',
+      tokenEndpoint: 'https://lms.example/token',
+      keysetUrl: 'https://lms.example/jwks',
+      deploymentId: null,
+      tenantId: 'org-9',
+    })
+    expect(saved.tenantId).toBe('org-9')
+    expect((await store.find('https://lms.example', 'c1'))?.tenantId).toBe('org-9')
+  })
+
+  it('omits tenantId when no tenant column is configured', async () => {
+    const p: Platform = {
+      id: 'p2',
+      issuer: 'https://lms2.example',
+      clientId: 'c2',
+      authEndpoint: 'https://lms2.example/auth',
+      tokenEndpoint: 'https://lms2.example/token',
+      keysetUrl: 'https://lms2.example/jwks',
+      deploymentId: null,
+    }
+    const client = makeClient({
+      lti_platforms: [{ ...seedRow(p), organization_id: 'org-x' }],
+    })
+    const store = supabasePlatformStore(client)
+    expect((await store.find('https://lms2.example', 'c2'))?.tenantId).toBeUndefined()
+  })
+
   it('round-trips the jsonb data payload through create → consume', async () => {
     const store = supabaseNonceStore(makeClient())
     await store.create({

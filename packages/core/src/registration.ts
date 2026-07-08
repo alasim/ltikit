@@ -89,6 +89,11 @@ export interface RegistrationParams {
   registrationToken?: string | null
   /** The tool being registered. */
   tool: RegistrationTool
+  /**
+   * Optional multi-tenant owner key persisted with the platform (e.g. an org
+   * id). Passed straight to `MutablePlatformStore.save` as `Platform.tenantId`.
+   */
+  tenantId?: string | null
 }
 
 export interface RegistrationResult {
@@ -216,6 +221,7 @@ export async function dynamicRegister(
     tokenEndpoint: config.token_endpoint,
     keysetUrl: config.jwks_uri,
     deploymentId: deploymentIdOf(registered),
+    tenantId: params.tenantId ?? null,
   })
 
   return { platform, registered, openidConfiguration: config }

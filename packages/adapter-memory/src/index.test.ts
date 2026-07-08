@@ -30,4 +30,22 @@ describe('@ltikit/adapter-memory', () => {
     })
     expect(await store.find('https://lms.example')).toMatchObject({ id: 'x' })
   })
+
+  it('carries tenantId through save → find and refreshes it on re-save', async () => {
+    const store = new MemoryPlatformStore()
+    const input = {
+      issuer: 'https://lms.example',
+      clientId: 'c',
+      authEndpoint: 'https://lms.example/auth',
+      tokenEndpoint: 'https://lms.example/token',
+      keysetUrl: 'https://lms.example/jwks',
+      tenantId: 'org-1',
+    }
+    await store.save(input)
+    expect((await store.find('https://lms.example', 'c'))?.tenantId).toBe('org-1')
+
+    // Re-save (upsert) with a new tenant updates it.
+    await store.save({ ...input, tenantId: 'org-2' })
+    expect((await store.find('https://lms.example', 'c'))?.tenantId).toBe('org-2')
+  })
 })

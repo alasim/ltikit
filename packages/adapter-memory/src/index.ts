@@ -76,6 +76,7 @@ export class MemoryPlatformStore implements MutablePlatformStore {
       existing.tokenEndpoint = input.tokenEndpoint
       existing.keysetUrl = input.keysetUrl
       if (input.deploymentId) existing.deploymentId = input.deploymentId
+      if (input.tenantId !== undefined) existing.tenantId = input.tenantId
       return Promise.resolve(existing)
     }
     const platform: Platform = { id: `mem-${++this.seq}`, ...input }

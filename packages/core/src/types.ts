@@ -14,6 +14,13 @@ export interface Platform {
   tokenEndpoint: string
   keysetUrl: string
   deploymentId?: string | null
+  /**
+   * Optional multi-tenant owner key (e.g. an organization id). The core only
+   * carries it: a `MutablePlatformStore` sets it at registration and returns it
+   * from `find`, so a multi-tenant tool can bind each platform to a tenant.
+   * Adapters without tenancy support leave it undefined.
+   */
+  tenantId?: string | null
 }
 
 // --- Claim value shapes ---

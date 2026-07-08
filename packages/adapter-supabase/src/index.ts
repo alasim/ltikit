@@ -41,6 +41,12 @@ export interface SupabaseLike {
 export interface PlatformStoreOptions {
   /** Table name (default `lti_platforms`). */
   table?: string
+  /**
+   * Column holding the multi-tenant owner key (e.g. `organization_id`). When
+   * set, `find` maps it to `Platform.tenantId` and `save` writes `tenantId` to
+   * it. Omit for single-tenant tools (default: no tenant column).
+   */
+  tenantColumn?: string
 }
 
 interface PlatformRow {
@@ -51,6 +57,7 @@ interface PlatformRow {
   token_endpoint: string
   keyset_url: string
   deployment_id: string | null
+  [column: string]: unknown
 }
 
 function errorMessage(error: unknown): string {
@@ -60,8 +67,8 @@ function errorMessage(error: unknown): string {
   return String(error)
 }
 
-function mapPlatform(row: PlatformRow): Platform {
-  return {
+function mapPlatform(row: PlatformRow, tenantColumn?: string): Platform {
+  const platform: Platform = {
     id: row.id,
     issuer: row.issuer,
     clientId: row.client_id,
@@ -70,6 +77,11 @@ function mapPlatform(row: PlatformRow): Platform {
     keysetUrl: row.keyset_url,
     deploymentId: row.deployment_id,
   }
+  if (tenantColumn) {
+    const t = row[tenantColumn]
+    platform.tenantId = typeof t === 'string' ? t : null
+  }
+  return platform
 }
 
 /**
@@ -82,6 +94,7 @@ export function supabasePlatformStore(
   options: PlatformStoreOptions = {},
 ): MutablePlatformStore {
   const table = options.table ?? 'lti_platforms'
+  const tenantColumn = options.tenantColumn
   return {
     async find(iss, clientId) {
       let query = client.from(table).select('*').eq('issuer', iss)
@@ -93,22 +106,23 @@ export function supabasePlatformStore(
         throw new Error(`ltikit: ${table} lookup failed for iss=${iss}: ${errorMessage(error)}`)
       }
       if (!data) return null
-      return mapPlatform(data as PlatformRow)
+      return mapPlatform(data as PlatformRow, tenantColumn)
     },
     async save(input: PlatformInput) {
+      const row: Record<string, unknown> = {
+        issuer: input.issuer,
+        client_id: input.clientId,
+        auth_endpoint: input.authEndpoint,
+        token_endpoint: input.tokenEndpoint,
+        keyset_url: input.keysetUrl,
+        deployment_id: input.deploymentId ?? null,
+      }
+      // Persist the tenant key to the configured column so a multi-tenant tool
+      // can bind each registration to its owner (e.g. organization_id).
+      if (tenantColumn) row[tenantColumn] = input.tenantId ?? null
       const { data, error } = await client
         .from(table)
-        .upsert(
-          {
-            issuer: input.issuer,
-            client_id: input.clientId,
-            auth_endpoint: input.authEndpoint,
-            token_endpoint: input.tokenEndpoint,
-            keyset_url: input.keysetUrl,
-            deployment_id: input.deploymentId ?? null,
-          },
-          { onConflict: 'issuer,client_id' },
-        )
+        .upsert(row, { onConflict: 'issuer,client_id' })
         .select('*')
         .maybeSingle()
       if (error) {
@@ -117,7 +131,7 @@ export function supabasePlatformStore(
       if (!data) {
         throw new Error(`ltikit: ${table} upsert returned no row for iss=${input.issuer}`)
       }
-      return mapPlatform(data as PlatformRow)
+      return mapPlatform(data as PlatformRow, tenantColumn)
     },
   }
 }

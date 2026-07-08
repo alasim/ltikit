@@ -116,6 +116,12 @@ export interface DynamicRegistrationBindingOptions {
    * incoming request (e.g. to build absolute URLs from the request host).
    */
   tool: RegistrationTool | ((req: Request) => RegistrationTool)
+  /**
+   * Optional multi-tenant owner key to persist with the platform (e.g. an org
+   * id), static or derived from the request — e.g. read + verify a signed query
+   * param. Throwing from the function rejects the registration with a 400.
+   */
+  tenantId?: string | ((req: Request) => string | Promise<string>)
 }
 
 /**
@@ -146,8 +152,23 @@ export function dynamicRegistration(lti: Lti, options: DynamicRegistrationBindin
     }
     const tool = typeof options.tool === 'function' ? options.tool(req) : options.tool
 
+    let tenantId: string | undefined
     try {
-      await lti.dynamicRegistration.register({ openidConfiguration, registrationToken, tool })
+      tenantId =
+        typeof options.tenantId === 'function' ? await options.tenantId(req) : options.tenantId
+    } catch (err) {
+      // A rejecting tenant resolver (e.g. an invalid signed registration link)
+      // must fail the whole registration, not persist an unowned platform.
+      return errorJson(errorMessage(err), 400)
+    }
+
+    try {
+      await lti.dynamicRegistration.register({
+        openidConfiguration,
+        registrationToken,
+        tool,
+        tenantId,
+      })
     } catch (err) {
       return errorJson(errorMessage(err), 400)
     }
