@@ -1,6 +1,6 @@
 {
   "name": "@ltikit/adapter-supabase",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "Supabase/Postgres PlatformStore + NonceStore adapters for ltikit.",
   "license": "MIT",
   "author": "alasim <alasim.mail@gmail.com> (https://github.com/alasim)",

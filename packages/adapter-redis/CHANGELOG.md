@@ -1,5 +1,12 @@
 # @ltikit/adapter-redis
 
+## 1.0.0-rc.3
+
+### Patch Changes
+
+- Updated dependencies [d1e81f5]
+  - @ltikit/core@1.0.0-rc.3
+
 ## 1.0.0-rc.2
 
 ### Patch Changes

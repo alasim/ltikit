@@ -17,6 +17,7 @@
   "changesets": [
     "capability-links-canvas-submission",
     "freeze-1-0-rc",
-    "npm-metadata-readmes"
+    "npm-metadata-readmes",
+    "tenant-aware-platform-store"
   ]
 }
